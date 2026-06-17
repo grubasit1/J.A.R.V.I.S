@@ -144,7 +144,7 @@ function bootStep(){if(bi<bootMsgs.length){const d=document.createElement('div')
 function endBoot(){document.getElementById('boot').classList.add('done');document.getElementById('hud').classList.add('show');document.getElementById('lock-input').focus();}
 
 // LOCK SYSTEM
-const PASS='your_passphrase';
+const PASS='';setTimeout(unlock,100);
 const KEYWORD='your_keyword';
 const lockEl=document.getElementById('lock');
 const lockInput=document.getElementById('lock-input');
