@@ -1,0 +1,37 @@
+# Credentials & tokens
+*.pickle
+*_secret.json
+.env
+*.key
+
+# Data files (personal)
+jarvis_memory.json
+jarvis_data.json
+jarvis_autonomy_state.json
+jarvis_history.json
+jarvis_credit.json
+jarvis_alerts.json
+jarvis_watchlist.json
+
+# Logs
+*.log
+
+# Media
+*.mp3
+*.wav
+*.mp4
+
+# Generated content
+jarvis_shorts/
+shorts/
+jarvis_research/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# System
+.DS_Store
+*.swp
