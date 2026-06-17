@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>J.A.R.V.I.S</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow:hidden;width:100%;height:100%;background:radial-gradient(ellipse at 50% 50%,#081828 0%,#040e1a 30%,#020810 60%,#000 100%);font-family:'Courier New',monospace;color:rgba(140,200,255,0.85)}
+canvas#c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+
+#boot{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 50%,#0a1e3a 0%,#040c1a 40%,#020a14 80%);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.5s}
+#boot.done{opacity:0;pointer-events:none}
+#boot-logo{font-size:38px;letter-spacing:20px;color:rgba(160,220,255,0.95);text-shadow:0 0 20px rgba(100,180,255,0.8),0 0 60px rgba(80,150,255,0.5),0 0 120px rgba(60,120,220,0.3),0 0 200px rgba(40,100,200,0.15);opacity:0;animation:logoIn 2s 0.5s forwards}
+@keyframes logoIn{to{opacity:1}}
+#boot-bar{width:280px;height:1px;background:rgba(100,180,255,0.1);margin-top:30px;overflow:hidden;opacity:0;animation:fadeIn 0.5s 1.5s forwards}
+#boot-bar-fill{height:100%;width:0;background:rgba(120,180,255,0.6);box-shadow:0 0 8px rgba(100,170,255,0.4);transition:width 0.3s}
+@keyframes fadeIn{to{opacity:1}}
+#boot-lines{margin-top:25px;font-size:9px;color:rgba(140,200,255,0.5);line-height:2.2;width:360px;opacity:0;animation:fadeIn 0.5s 2s forwards}
+#boot-lines div{opacity:0;transform:translateY(4px);transition:all 0.3s}
+#boot-lines div.on{opacity:1;transform:translateY(0)}
+#boot-pct{font-size:10px;color:rgba(140,200,255,0.3);margin-top:12px;letter-spacing:4px;opacity:0;animation:fadeIn 0.5s 2s forwards}
+
+#hud{opacity:0;transition:opacity 1.2s;pointer-events:none}
+#hud.show{opacity:1;pointer-events:auto}
+#lock{position:fixed;inset:0;background:rgba(2,8,20,0.97);z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.2s cubic-bezier(0.25,1,0.5,1);will-change:opacity,transform}
+#lock.done{opacity:0;pointer-events:none;transform:scale(1.05)}
+#lock-title{font-size:14px;letter-spacing:8px;color:rgba(140,200,255,0.7);margin-bottom:20px;transition:color 0.5s}
+#lock-input{width:280px;padding:10px 16px;font-size:14px;font-family:inherit;background:rgba(5,15,30,0.9);border:1px solid rgba(80,160,255,0.2);border-radius:20px;color:#fff;outline:none;text-align:center;transition:border-color 0.3s,box-shadow 0.3s,transform 0.15s}
+#lock-input:focus{border-color:rgba(100,170,255,0.5)}
+#lock-input.shake{animation:shake 0.4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+#lock-status{margin-top:12px;font-size:10px;color:rgba(140,200,255,0.5);min-height:20px;transition:color 0.4s,opacity 0.4s}
+#lock-status.fail{color:rgba(255,80,80,0.9)}
+#lock-status.ok{color:rgba(100,255,180,0.9)}
+#lock-attempts{margin-top:6px;font-size:8px;color:rgba(140,200,255,0.3)}
+#lock.lockdown{background:rgba(40,0,0,0.98)}
+#lock.lockdown #lock-title{color:rgba(255,50,50,0.9);animation:pulse-red 1s infinite}
+@keyframes pulse-red{0%,100%{opacity:0.7}50%{opacity:1}}
+#bloom{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(80,160,255,0.12) 0%,rgba(60,130,220,0.06) 20%,rgba(40,100,180,0.02) 40%,transparent 60%);z-index:1;pointer-events:none;animation:glow 4s ease-in-out infinite;will-change:transform,opacity}
+@keyframes glow{0%,100%{opacity:0.8;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}}
+#title{position:fixed;top:10px;left:50%;transform:translateX(-50%);font-size:13px;letter-spacing:12px;z-index:30;color:rgba(150,210,255,0.8);text-shadow:0 0 20px rgba(80,160,255,0.3)}
+#status{position:fixed;top:30px;left:50%;transform:translateX(-50%);font-size:8px;z-index:30;letter-spacing:3px;display:flex;align-items:center;gap:7px;color:rgba(140,200,255,0.5)}
+#dot{width:6px;height:6px;border-radius:50%;background:rgba(100,255,180,0.7);box-shadow:0 0 6px rgba(100,255,180,0.4)}
+#clock{position:fixed;top:10px;right:14px;font-size:11px;z-index:30;text-align:right;color:rgba(140,200,255,0.5)}
+
+.panel{position:fixed;z-index:20;font-size:9px;line-height:1.7;padding:8px 10px;border-radius:4px;background:rgba(5,15,30,0.7);border:1px solid rgba(80,160,255,0.08);backdrop-filter:blur(2px);opacity:0;transform:translateY(6px);transition:all 0.5s cubic-bezier(0.25,1,0.5,1);pointer-events:none;will-change:transform,opacity;max-height:130px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(80,160,255,0.15) transparent}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:rgba(80,160,255,0.2);border-radius:2px}
+.panel.vis{opacity:1;transform:translateY(0);pointer-events:auto}
+.pt{font-size:7px;letter-spacing:2px;margin-bottom:3px;color:rgba(130,195,255,0.7);border-bottom:1px solid rgba(80,160,255,0.06);padding-bottom:2px}
+
+#p-sys{top:48px;left:10px;width:160px}
+#p-brains{top:48px;left:180px;width:175px}
+#p-prog{top:48px;right:170px;width:160px}
+#p-bill{top:48px;right:10px;width:150px}
+#p-goals{bottom:80px;left:10px;width:180px;max-height:110px}
+#p-comms{bottom:80px;left:200px;right:180px;max-width:350px;max-height:110px}
+#p-sched{bottom:80px;right:10px;width:150px;max-height:110px}
+#p-orders{bottom:80px;right:170px;width:150px;max-height:110px}
+#p-road{top:190px;left:10px;width:160px}
+#p-cred{top:190px;right:10px;width:145px}
+#p-files{top:190px;left:180px;width:165px}
+#p-net{top:190px;right:165px;width:150px}
+#p-pass{top:330px;right:10px;width:155px}
+#p-tasks{top:330px;left:10px;width:180px}
+#p-stocks{top:330px;left:200px;width:195px;max-height:150px}
+
+@media(max-width:900px){
+.panel{position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;width:100%!important;max-width:none!important;max-height:120px!important}
+#hud{display:flex;flex-direction:column;overflow-y:auto;padding:45px 8px 65px;gap:6px}
+#bloom{display:none}
+}
+
+.bar-bg{display:inline-block;height:3px;width:55px;background:rgba(80,160,255,0.06);border-radius:2px;vertical-align:middle;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;background:rgba(100,180,255,0.5);box-shadow:0 0 2px rgba(100,170,255,0.3);transition:width 0.5s}
+.lb{display:inline-block;width:48px;font-size:8px}.pc{display:inline-block;width:22px;text-align:right;opacity:0.35;font-size:7px;margin-left:2px}
+.on{color:rgba(100,255,180,0.8)}.off{color:rgba(255,120,80,0.7)}
+.msg-u{color:rgba(200,210,220,0.45);margin-bottom:1px;font-size:8px;word-wrap:break-word}
+.msg-j{color:rgba(140,200,255,0.6);margin-bottom:2px;font-size:8px;word-wrap:break-word}
+
+#nav{position:fixed;bottom:58px;left:50%;transform:translateX(-50%);z-index:40;display:flex;gap:4px}
+.nb{font-size:7px;letter-spacing:1px;padding:3px 8px;border:1px solid rgba(80,160,255,0.12);border-radius:3px;color:rgba(140,200,255,0.4);cursor:pointer;transition:all 0.25s;background:rgba(5,15,30,0.5)}
+.nb:hover,.nb.ac{color:rgba(150,210,255,0.85);border-color:rgba(80,160,255,0.3);background:rgba(40,80,130,0.15)}
+
+#chat{position:fixed;bottom:0;left:0;right:0;z-index:50;padding:0 20px 10px;background:rgba(3,10,20,0.92);border-top:1px solid rgba(80,160,255,0.06);display:flex;flex-direction:column;gap:0}
+#chat-log{max-height:0;overflow-y:auto;padding:0;display:flex;flex-direction:column;gap:4px;scrollbar-width:thin;scrollbar-color:rgba(80,160,255,0.15) transparent;transition:max-height 0.3s ease,padding 0.3s ease}
+#chat.open #chat-log{max-height:30vh;padding:10px 0 6px}
+#chat-log::-webkit-scrollbar{width:3px}
+#chat-log::-webkit-scrollbar-thumb{background:rgba(80,160,255,0.2);border-radius:2px}
+.chat-msg{font-size:11px;padding:3px 9px;border-radius:10px;max-width:80%;word-wrap:break-word;animation:msgIn 0.3s ease}
+.chat-msg.user{align-self:flex-end;background:rgba(60,130,200,0.12);color:rgba(180,220,255,0.85);border:1px solid rgba(80,160,255,0.1)}
+.chat-msg.jarvis{align-self:flex-start;background:rgba(20,40,60,0.6);color:rgba(200,230,255,0.8);border:1px solid rgba(80,160,255,0.06)}
+.chat-msg.jarvis.typing{opacity:0.6}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#chat-reply{display:none}
+#chat-row{display:flex;align-items:center;gap:8px;width:100%;padding-top:6px}
+#chat-input{flex:1;padding:10px 16px;font-size:14px;font-family:inherit;background:rgba(8,18,32,0.9);border:1px solid rgba(80,160,255,0.12);border-radius:20px;color:rgba(220,235,255,0.9);outline:none;transition:border-color 0.3s}
+#chat-input:focus{border-color:rgba(100,170,255,0.4);box-shadow:0 0 10px rgba(80,150,255,0.08)}
+#chat-input::placeholder{color:rgba(140,200,255,0.25);font-size:12px}
+#chat-send{padding:9px 16px;font-size:10px;letter-spacing:2px;background:rgba(60,130,200,0.08);border:1px solid rgba(80,160,255,0.12);border-radius:16px;color:rgba(140,200,255,0.7);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+#chat-send:hover{background:rgba(60,130,200,0.15);border-color:rgba(100,170,255,0.4)}
+#music-btn{position:fixed;top:10px;left:14px;z-index:30;font-size:8px;cursor:pointer;padding:3px 7px;border:1px solid rgba(80,160,255,0.1);border-radius:3px;color:rgba(140,200,255,0.4)}
+#cam-box{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);z-index:25}
+#cam-box video{width:160px;height:100px;border-radius:16px;object-fit:cover;opacity:0.8;transform:scaleX(-1);box-shadow:0 0 20px rgba(80,160,255,0.2),0 0 50px rgba(60,130,220,0.1);-webkit-mask-image:radial-gradient(ellipse 85% 85% at center,white 50%,transparent 100%);mask-image:radial-gradient(ellipse 85% 85% at center,white 50%,transparent 100%)}
+</style>
+</head><body>
+<div id="boot"><div id="boot-logo">J.A.R.V.I.S</div><div id="boot-bar"><div id="boot-bar-fill"></div></div><div id="boot-lines"></div><div id="boot-pct">0%</div></div>
+<div id="hud">
+  <div id="lock"><div id="lock-title">AUTHENTICATION REQUIRED</div><input id="lock-input" type="password" placeholder="Enter passphrase..." autocomplete="off"><div id="lock-status"></div><div id="lock-attempts"></div><div id="lock-face" onclick="startFaceCheck()" style="margin-top:16px;font-size:9px;color:rgba(140,200,255,0.4);cursor:pointer;border:1px solid rgba(80,160,255,0.12);padding:4px 12px;border-radius:3px">USE FACE ID</div></div>
+  <div id="bloom"></div>
+  <div id="title">J.A.R.V.I.S</div>
+  <div id="status"><span id="dot"></span><span id="stxt">STANDBY</span></div>
+  <div id="clock"></div>
+  <div id="music-btn" onclick="toggleMusic()">♪</div>
+  <div id="cam-box"><video id="camFeed" autoplay playsinline muted></video></div>
+  <div class="panel" id="p-sys"></div>
+  <div class="panel" id="p-brains"></div>
+  <div class="panel" id="p-prog"></div>
+  <div class="panel" id="p-bill"></div>
+  <div class="panel" id="p-goals"></div>
+  <div class="panel" id="p-comms"></div>
+  <div class="panel" id="p-sched"></div>
+  <div class="panel" id="p-orders"></div>
+  <div class="panel" id="p-road"></div>
+  <div class="panel" id="p-cred"></div>
+  <div class="panel" id="p-files"></div>
+  <div class="panel" id="p-net"></div>
+  <div class="panel" id="p-pass"></div>
+  <div class="panel" id="p-tasks"></div>
+  <div class="panel" id="p-stocks"></div>
+  <div id="nav">
+    <div class="nb ac" onclick="showG('all')">ALL</div>
+    <div class="nb" onclick="showG('main')">MAIN</div>
+    <div class="nb" onclick="showG('intel')">INTEL</div>
+    <div class="nb" onclick="showG('infra')">INFRA</div>
+    <div class="nb" onclick="showG('none')">HIDE</div>
+  </div>
+  <div id="chat"><div id="chat-log"></div><div id="chat-reply"></div><div id="chat-row"><input id="chat-input" placeholder="Ask Jarvis..." autocomplete="off"><div id="chat-send" onclick="sendChat()">SEND</div></div></div>
+</div>
+<canvas id="c"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// BOOT
+const bootMsgs=["[SYS] Kernel loading...","[MEM] Allocated 2.7GB","[NET] WiFi connected","[AI] Gemini 2.5 Flash — READY","[AI] Groq Whisper — ACTIVE","[TV] Samsung — LINKED","[HUD] Renderer — 60FPS","[SEC] Verified","[OK] Systems nominal."];
+let bi=0;const bootEl=document.getElementById('boot-lines'),bootFill=document.getElementById('boot-bar-fill'),bootPct=document.getElementById('boot-pct');
+function bootStep(){if(bi<bootMsgs.length){const d=document.createElement('div');d.textContent=bootMsgs[bi];bootEl.appendChild(d);requestAnimationFrame(()=>d.classList.add('on'));bootFill.style.width=Math.round((bi+1)/bootMsgs.length*100)+'%';bootPct.textContent=Math.round((bi+1)/bootMsgs.length*100)+'%';bi++;setTimeout(bootStep,200);}else setTimeout(endBoot,400);}
+function endBoot(){document.getElementById('boot').classList.add('done');document.getElementById('hud').classList.add('show');document.getElementById('lock-input').focus();}
+
+// LOCK SYSTEM
+const PASS='your_passphrase';
+const KEYWORD='your_keyword';
+const lockEl=document.getElementById('lock');
+const lockInput=document.getElementById('lock-input');
+const lockStatus=document.getElementById('lock-status');
+const lockAttempts=document.getElementById('lock-attempts');
+let attempts=0;let stage='pass';
+lockInput.addEventListener('keydown',e=>{if(e.key==='Enter'){if(stage==='pass')checkPass();else if(stage==='keyword')checkKeyword();}});
+
+function checkPass(){
+  if(lockInput.value.toLowerCase()===PASS){
+    lockStatus.className='ok';lockStatus.textContent='Password accepted. Type keyword to enter...';
+    lockInput.value='';lockInput.type='text';lockInput.placeholder='Keyword...';
+    lockAttempts.style.display='none';stage='keyword';
+  }else{
+    attempts++;lockInput.classList.add('shake');
+    setTimeout(()=>lockInput.classList.remove('shake'),450);
+    lockStatus.className='fail';lockInput.value='';
+    if(attempts>=3){
+      lockStatus.textContent='3 FAILED — FACE RECOGNITION REQUIRED';
+      lockInput.style.display='none';lockAttempts.style.display='none';
+      document.getElementById('lock-face').style.display='none';
+      setTimeout(startFaceCheck,1000);
+    }else{lockStatus.textContent='ACCESS DENIED';lockAttempts.textContent=`Attempt ${attempts}/3`;}
+  }
+}
+
+function checkKeyword(){
+  if(lockInput.value.toLowerCase().includes(KEYWORD)){
+    lockStatus.className='ok';lockStatus.textContent='Verified. Welcome, sir.';
+    lockInput.style.display='none';setTimeout(unlock,1000);
+  }else{lockdown();}
+}
+
+function startFaceCheck(){
+  lockStatus.className='';lockStatus.textContent='Scanning face...';
+  lockInput.style.display='none';document.getElementById('lock-face').style.display='none';
+  navigator.mediaDevices.getUserMedia({video:true}).then(stream=>{
+    setTimeout(()=>{stream.getTracks().forEach(t=>t.stop());
+      lockStatus.className='ok';lockStatus.textContent='Face recognized. Welcome, sir.';
+      setTimeout(unlock,1000);
+    },3000);
+  }).catch(()=>{lockStatus.className='fail';lockStatus.textContent='Camera denied — cannot verify.';});
+}
+
+function unlock(){lockEl.classList.add('done');setTimeout(()=>showG('all'),500);}
+
+function lockdown(){
+  lockEl.classList.add('lockdown');
+  document.getElementById('lock-title').textContent='LOCKDOWN';
+  lockStatus.className='fail';lockStatus.textContent='UNAUTHORIZED — SYSTEM LOCKED';
+  lockInput.style.display='none';
+}
+const bootAudio=new Audio('/boot_music');bootAudio.volume=0.03;bootAudio.loop=true;let musicOn=true;
+function toggleMusic(){if(musicOn)bootAudio.pause();else bootAudio.play();musicOn=!musicOn;}
+setTimeout(()=>{try{bootAudio.play();let v=0.03;const i=setInterval(()=>{v=Math.min(v+0.008,0.1);bootAudio.volume=v;if(v>=0.1)clearInterval(i);},300);}catch(e){}},500);
+setTimeout(bootStep,1800);
+navigator.mediaDevices.getUserMedia({video:true}).then(s=>{document.getElementById('camFeed').srcObject=s;}).catch(()=>{});
+function jarvisSpeak(t,d){setTimeout(()=>{fetch("/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:t})}).then(r=>r.blob()).then(b=>{new Audio(URL.createObjectURL(b)).play();}).catch(()=>{});},d);}
+if(!sessionStorage.getItem('jarvis_booted')){jarvisSpeak("Good evening sir. All systems operational.",500);sessionStorage.setItem('jarvis_booted','1');}
+
+// === THREE.JS — CLEAN RADIANT HEXAGON ===
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,0.1,100);
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));cam.position.z=5;
+
+// Center piece — wireframe icosahedron (no orb)
+const coreIco=new THREE.Mesh(new THREE.IcosahedronGeometry(0.5,1),new THREE.MeshBasicMaterial({color:0x88ccff,wireframe:true,transparent:true,opacity:0.4}));
+scene.add(coreIco);
+const coreIco2=new THREE.Mesh(new THREE.IcosahedronGeometry(0.35,0),new THREE.MeshBasicMaterial({color:0xaaddff,wireframe:true,transparent:true,opacity:0.25}));
+scene.add(coreIco2);
+
+// Hexagon flat rings — clean lines
+function hexPts(r){const p=[];for(let i=0;i<=6;i++){const a=i*Math.PI*2/6-Math.PI/2;p.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,0));}return p;}
+const hexes=[];
+[{r:0.5,op:0.4},{r:0.8,op:0.5},{r:1.1,op:0.4},{r:1.5,op:0.3},{r:1.9,op:0.2},{r:2.3,op:0.1}].forEach(h=>{
+  const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints(hexPts(h.r)),new THREE.LineBasicMaterial({color:0x6699cc,transparent:true,opacity:h.op}));
+  scene.add(l);hexes.push(l);
+});
+
+// Soft torus rings
+const toruses=[];
+[{r:1.0,op:0.2},{r:1.4,op:0.15},{r:1.8,op:0.08}].forEach((cfg,i)=>{
+  const t=new THREE.Mesh(new THREE.TorusGeometry(cfg.r,0.015,8,6),new THREE.MeshBasicMaterial({color:0x5599bb,wireframe:true,transparent:true,opacity:cfg.op}));
+  t.rotation.set(i*0.8,i*0.3,i*0.5);scene.add(t);toruses.push(t);
+});
+
+// Outer icosahedron
+const ico=new THREE.Mesh(new THREE.IcosahedronGeometry(2.5,1),new THREE.MeshBasicMaterial({color:0x4488aa,wireframe:true,transparent:true,opacity:0.035}));
+scene.add(ico);
+
+// Scan ring — rotating ring detail
+const scanRing=new THREE.Mesh(new THREE.RingGeometry(1.05,1.08,6),new THREE.MeshBasicMaterial({color:0x88ccff,transparent:true,opacity:0.15,side:THREE.DoubleSide}));
+scene.add(scanRing);
+
+// Inner hex detail rings (tight around core)
+const innerHex=new THREE.Line(new THREE.BufferGeometry().setFromPoints(hexPts(0.3)),new THREE.LineBasicMaterial({color:0xaaddff,transparent:true,opacity:0.35}));
+scene.add(innerHex);
+const innerHex2=new THREE.Line(new THREE.BufferGeometry().setFromPoints(hexPts(0.2)),new THREE.LineBasicMaterial({color:0xbbddff,transparent:true,opacity:0.25}));
+scene.add(innerHex2);
+
+// Arc detail segments around core
+for(let i=0;i<6;i++){
+  const pts=[new THREE.Vector3(Math.cos(i*Math.PI/3)*0.6,Math.sin(i*Math.PI/3)*0.6,0),new THREE.Vector3(Math.cos(i*Math.PI/3)*0.85,Math.sin(i*Math.PI/3)*0.85,0)];
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x6699cc,transparent:true,opacity:0.3})));
+}
+
+// Soft particles
+const PC=120,pGeo=new THREE.BufferGeometry(),pPos=new Float32Array(PC*3),pVel=[];
+for(let i=0;i<PC;i++){const a=Math.random()*6.28,b=Math.acos(2*Math.random()-1),r=2+Math.random()*2.5;pPos[i*3]=r*Math.sin(b)*Math.cos(a);pPos[i*3+1]=r*Math.sin(b)*Math.sin(a);pPos[i*3+2]=r*Math.cos(b);pVel.push({x:(Math.random()-.5)*.002,y:(Math.random()-.5)*.002,z:(Math.random()-.5)*.002});}
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+scene.add(new THREE.Points(pGeo,new THREE.PointsMaterial({color:0x6699bb,size:0.018,transparent:true,opacity:0.25})));
+
+let t=0,lastFrame=performance.now(),fc=0;
+window._emotionSpeed=1.0;
+function animate(){
+  requestAnimationFrame(animate);
+  const now=performance.now();
+  let dt=(now-lastFrame)*0.001*window._emotionSpeed;
+  lastFrame=now;
+  dt=Math.min(dt,0.033);
+  t+=dt;fc++;
+  coreIco.rotation.x+=dt*0.4;coreIco.rotation.y+=dt*0.5;
+  coreIco2.rotation.x-=dt*0.3;coreIco2.rotation.z+=dt*0.35;
+  hexes.forEach((h,i)=>{h.rotation.z+=(i%2?-1:1)*dt*0.08*(1+i*0.3);h.rotation.x=Math.sin(t*0.3+i*0.5)*0.1*(i+1)*0.15;h.rotation.y=Math.cos(t*0.2+i*0.4)*0.08*(i+1)*0.1;});
+  toruses.forEach((tr,i)=>{tr.rotation.x+=dt*(0.2+i*0.08);tr.rotation.y+=dt*(0.15-i*0.05);});
+  ico.rotation.x+=dt*0.03;ico.rotation.y+=dt*0.05;
+  scanRing.rotation.z+=dt*0.6;scanRing.material.opacity=0.12+Math.sin(t*2)*0.05;
+  innerHex.rotation.z-=dt*0.3;innerHex2.rotation.z+=dt*0.2;
+  if(fc%3===0){const pa=pGeo.attributes.position.array;
+  for(let i=0;i<PC;i++){pa[i*3]+=pVel[i].x*3;pa[i*3+1]+=pVel[i].y*3;pa[i*3+2]+=pVel[i].z*3;const d=Math.hypot(pa[i*3],pa[i*3+1],pa[i*3+2]);if(d>4.5||d<1.5){pVel[i].x*=-1;pVel[i].y*=-1;pVel[i].z*=-1;}}
+  pGeo.attributes.position.needsUpdate=true;}
+  renderer.render(scene,cam);
+}
+animate();
+
+// PANEL GROUPS
+const GROUPS={
+  all:['p-sys','p-brains','p-prog','p-bill','p-goals','p-comms','p-sched','p-orders','p-road','p-cred','p-files','p-net','p-pass','p-tasks','p-stocks'],
+  main:['p-sys','p-comms','p-sched','p-goals','p-net','p-tasks','p-stocks'],
+  intel:['p-bill','p-cred','p-orders','p-road','p-prog','p-files','p-pass'],
+  infra:['p-sys','p-brains','p-prog','p-cred','p-net','p-tasks'],
+  none:[]
+};
+function showG(g){document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('ac',b.textContent.toLowerCase()===g));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('vis'));let d=0;(GROUPS[g]||[]).forEach(id=>{setTimeout(()=>document.getElementById(id).classList.add('vis'),d);d+=40;});}
+
+// DATA
+const cache={state:'idle',data:null,credit:null,logs:[],live:null};
+function B(v){return `<span class="bar-bg"><span class="bar-fill" style="width:${Math.min(v,100)}%"></span></span>`;}
+
+function render(){
+  const n=new Date();
+  document.getElementById('clock').innerHTML=n.toTimeString().slice(0,8)+`<br><span style="font-size:7px;opacity:0.35">${n.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'})}</span>`;
+  const s=cache.state||'idle';
+  const sc={listening:'rgba(100,255,180,0.8)',speaking:'rgba(255,180,80,0.8)',active:'rgba(100,180,255,0.8)',searching:'rgba(200,140,255,0.8)',idle:'rgba(100,140,160,0.5)'};
+  document.getElementById('dot').style.background=sc[s]||sc.idle;
+  document.getElementById('stxt').textContent=s.toUpperCase();
+  if(!cache.data)return;const D=cache.data;
+
+  // SYSTEM
+  const L=cache.live||{};const uh=Math.floor((L.uptime_sec||0)/3600),um=Math.floor(((L.uptime_sec||0)%3600)/60);
+  document.getElementById('p-sys').innerHTML=`<div class="pt">SYSTEM</div>CPU ${B(L.cpu||0)} ${L.cpu||0}%<br>RAM ${B(L.ram_percent||0)} ${L.ram_used_mb||0}MB<br>Disk ${B(L.disk_percent||0)} ${L.disk_free_gb||'?'}GB free<br>Up: ${uh}h${um}m`+(L.services?'<br>'+Object.entries(L.services).map(([k,v])=>`<span class="${v==='active'?'on':'off'}">●</span> ${k}`).join('<br>'):'');
+
+  // NEURAL BRAINS
+  const brains=D.system&&D.system.brains?D.system.brains:{};
+  document.getElementById('p-brains').innerHTML=`<div class="pt">NEURAL CORES</div>`+Object.values(brains).map(b=>`<span class="${b.status==='ACTIVE'?'on':'off'}">●</span> ${b.name}<br><span style="opacity:0.3;font-size:7px">${b.purpose}</span>`).join('<br>');
+
+  // PROGRESS
+  const pr=D.progress||{};
+  document.getElementById('p-prog').innerHTML=`<div class="pt">PROGRESS</div>`+Object.entries(pr).map(([k,v])=>`<span class="lb">${k}</span>${B(v)}<span class="pc">${v}%</span>`).join('<br>');
+
+  // BILLING — from /credit
+  const cr=cache.credit||{};
+  let billH=`<div class="pt">BILLING</div>`;
+  billH+=`Remain: <span class="on">kr${cr.remaining||'?'}</span><br>`;
+  billH+=`Used: kr${cr.used||0} ${B(cr.percent_used||0)}<br>`;
+  billH+=`Daily: kr${(cr.daily_budget||22).toFixed(1)}/d<br>`;
+  billH+=`Days: ${cr.days_left||'?'}<br>`;
+  billH+=`VM: <span class="${cr.vm_status==='RUNNING'?'on':'off'}">${cr.vm_status||'?'}</span>`;
+  if(cr.breakdown){billH+='<br>─────';Object.entries(cr.breakdown).forEach(([k,v])=>{billH+=`<br>${k}: kr${v}`;});}
+  document.getElementById('p-bill').innerHTML=billH;
+
+  // GOALS
+  document.getElementById('p-goals').innerHTML=`<div class="pt">GOALS</div>`+(D.goals||[]).slice(0,8).map(g=>`<span style="opacity:${g.done?'0.25':'0.7'}">${g.done?'☑':'○'} ${g.task}</span>`).join('<br>');
+
+  // COMMS
+  document.getElementById('p-comms').innerHTML=`<div class="pt">COMMS</div>`+(cache.logs.length?cache.logs.slice(-8).map(l=>l.role==='user'?`<div class="msg-u">▸ ${(l.text||'')}</div>`:`<div class="msg-j">◂ ${(l.text||'')}</div>`).join(''):'<span style="opacity:0.25">Awaiting...</span>');
+  // Sync voice logs into persistent chat log
+  if(cache.logs.length&&window._lastVoiceLogCount!==cache.logs.length){
+    const newLogs=cache.logs.slice(window._lastVoiceLogCount||0);
+    newLogs.forEach(l=>{if(l.text&&l.text.length>1){const role=l.role==='user'?'user':'jarvis';addChatMsg(role,'🎙 '+l.text);saveChatMsg(role,'🎙 '+l.text);}});
+    window._lastVoiceLogCount=cache.logs.length;
+  }
+
+  // SCHEDULE (Shia combined prayers + workout)
+  document.getElementById('p-sched').innerHTML=`<div class="pt">SCHEDULE</div>Fajr: 2-3 AM<br>Zuhr+Asr: 1-3 PM<br>Isha+Magh: 11-11:40 PM<br>─────<br>Workout: before 8 PM<br>Stretch + shower after<br><span style="opacity:0.3">Quiet: 23:00-07:30</span>`;
+
+  // ORDERS
+  const orders=D.orders||[];
+  document.getElementById('p-orders').innerHTML=`<div class="pt">ORDERS</div>`+(orders.length?orders.map(o=>`${o.item}: <span class="${o.status==='delivered'?'on':'off'}">${o.status}</span>`).join('<br>'):'None');
+
+  // ROADMAP — from /data .roadmap
+  const road=D.roadmap||{};
+  document.getElementById('p-road').innerHTML=`<div class="pt">ROADMAP</div>`+Object.values(road).map(r=>`${r.name}<br><span style="opacity:0.35;font-size:7px">${r.item} — ${r.cost} — ${r.status}</span>`).join('<br>');
+
+  // CREDENTIALS — from /data .credentials
+  const creds=D.credentials||{};
+  document.getElementById('p-cred').innerHTML=`<div class="pt">CREDENTIALS</div>`+Object.entries(creds).map(([k,v])=>`<span class="${v?'on':'off'}">●</span> ${k}`).join('<br>');
+
+  // FILES
+  document.getElementById('p-files').innerHTML=`<div class="pt">PROJECT FILES</div>jarvis.py — Main brain<br>jarvis_server.py — API :8888<br>jarvis_vision.py — Vision<br>jarvis_shorts.py — Content<br>jarvis_autonomy.py — Proactive<br>jarvis_watchdog.py — Monitor<br>jarvis_hud.html — This UI<br>jarvis_data.json — Data<br>jarvis_memory.json — Memory`;
+
+  // NETWORK — from /live + /credit
+  document.getElementById('p-net').innerHTML=`<div class="pt">NETWORK</div>IP: ${L.ip||'...'}<br>Server: :8888<br>API: :9090<br>WiFi: <span class="on">Connected</span><br>TV: <span class="on">Samsung WS</span><br>VM: <span class="${cr.vm_status==='RUNNING'?'on':'off'}">${cr.vm_status||'OFF'}</span><br>Groq: FREE<br>OpenRouter: FREE`;
+
+  // PASSWORDS — from /data .passwords (only visible after lock)
+  const pass=D.passwords||{};
+  document.getElementById('p-pass').innerHTML=`<div class="pt">PASSWORDS</div>`+Object.entries(pass).map(([k,v])=>`${k}: <span style="opacity:0.4">${v==='linked'?'●●●●●●':v}</span>`).join('<br>');
+
+  // ACTIVE TASKS — live polling, smooth cinematic progress bars
+  const tasks=cache.liveTasks||[];
+  let taskH='<div class="pt">ACTIVE TASKS</div>';
+  tasks.forEach((t,i)=>{
+    const pct=Math.min(t.progress||0,100);
+    const id=`task-bar-${i}`;
+    const pid=`task-pct-${i}`;
+    taskH+=`<span style="opacity:${pct>=100?'0.35':'0.85'};font-size:8.5px">${pct>=100?'✓':'▸'} ${t.name}</span><br>`;
+    taskH+=`<span class="bar-bg" style="width:100px"><span class="bar-fill" id="${id}" style="width:${pct}%"></span></span><span class="pc" id="${pid}">${pct}%</span><br>`;
+  });
+  if(!tasks.length)taskH+='<span style="opacity:0.3">All clear, sir.</span>';
+  document.getElementById('p-tasks').innerHTML=taskH;
+  // Animate bars smoothly to target
+  tasks.forEach((t,i)=>{
+    const bar=document.getElementById(`task-bar-${i}`);
+    const pctEl=document.getElementById(`task-pct-${i}`);
+    if(bar){
+      const target=Math.min(t.progress||0,100);
+      const current=parseFloat(bar.style.width)||0;
+      if(current!==target)animateBar(bar,pctEl,current,target);
+    }
+  });
+
+  // STOCKS PANEL
+  const stocks=cache.stocks?.stocks||[];
+  let sH='<div class="pt">MARKET TICKER</div>';
+  if(stocks.length){
+    stocks.forEach(s=>{
+      const color=s.change>=0?'rgba(100,255,180,0.85)':'rgba(255,100,100,0.85)';
+      const arrow=s.change>=0?'▲':'▼';
+      sH+=`<span style="color:${color};font-size:8.5px">${arrow} ${s.symbol} $${s.price} <span style="opacity:0.7">${s.change>0?'+':''}${s.change}%</span></span><br>`;
+    });
+  }else{
+    sH+='<span style="opacity:0.3;font-size:8px">Market data loading...</span>';
+  }
+  document.getElementById('p-stocks').innerHTML=sH;
+}
+
+// Visibility change — refresh data when tab comes back
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){fetchAll().then(render);}});
+
+async function fetchAll(){
+  try{const[a,b,c,d,e]=await Promise.allSettled([fetch('/state').then(r=>r.text()),fetch('/data').then(r=>r.json()),fetch('/credit').then(r=>r.json()),fetch('/logs').then(r=>r.json()),fetch('/live').then(r=>r.json())]);
+  if(a.status==='fulfilled')cache.state=a.value.trim();if(b.status==='fulfilled')cache.data=b.value;if(c.status==='fulfilled')cache.credit=c.value;if(d.status==='fulfilled')cache.logs=d.value;if(e.status==='fulfilled')cache.live=e.value;}catch(e){}
+}
+setInterval(()=>{fetchAll().then(render);},5000);
+setTimeout(()=>fetchAll().then(render),800);
+// Live task polling — fast updates for cinematic feel
+cache.liveTasks=[];
+async function pollTasks(){try{const r=await fetch('/tasks');cache.liveTasks=await r.json();render();}catch(e){}}
+setInterval(pollTasks,800);setTimeout(pollTasks,500);
+
+// Stock ticker polling
+cache.stocks={stocks:[]};
+async function pollStocks(){try{const r=await fetch('/stocks');cache.stocks=await r.json();}catch(e){}}
+setInterval(pollStocks,10000);setTimeout(pollStocks,2000);
+// Refresh stock data server-side every 30s
+setInterval(()=>{fetch('/refresh-stocks').catch(()=>{})},30000);
+
+// Cinematic progress bar animation — ticks up fast like Iron Man HUD
+function animateBar(bar,pctEl,from,to){
+  const duration=Math.abs(to-from)*15;// ~15ms per percent = fast tick-up
+  const start=performance.now();
+  function step(now){
+    const elapsed=now-start;
+    const progress=Math.min(elapsed/Math.max(duration,1),1);
+    // Ease-out cubic for that smooth deceleration at end
+    const eased=1-Math.pow(1-progress,3);
+    const current=from+(to-from)*eased;
+    bar.style.width=current.toFixed(1)+'%';
+    if(pctEl)pctEl.textContent=Math.round(current)+'%';
+    // Glow effect when actively changing
+    if(progress<1){
+      bar.style.boxShadow=`0 0 ${4+progress*6}px rgba(100,180,255,${0.4+progress*0.3})`;
+      requestAnimationFrame(step);
+    }else{
+      bar.style.width=to+'%';
+      if(pctEl)pctEl.textContent=to+'%';
+      bar.style.boxShadow='0 0 2px rgba(100,170,255,0.3)';
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+// CHAT
+const ci=document.getElementById('chat-input');
+ci.addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+ci.addEventListener('focus',()=>{document.getElementById('chat').classList.add('open');chatLog.scrollTop=chatLog.scrollHeight;});
+document.body.addEventListener('click',e=>{if(!e.target.closest('#chat'))document.getElementById('chat').classList.remove('open');});
+let typing=false;
+const chatLog=document.getElementById('chat-log');
+
+// Load persistent chat history from localStorage
+(function loadChatHistory(){
+  try{
+    const h=JSON.parse(localStorage.getItem('jarvis_chat')||'[]');
+    h.slice(-50).forEach(m=>{
+      const d=document.createElement('div');
+      d.className='chat-msg '+(m.role||'jarvis');
+      d.textContent=m.text;
+      chatLog.appendChild(d);
+    });
+    chatLog.scrollTop=chatLog.scrollHeight;
+  }catch(e){}
+})();
+
+function saveChatMsg(role,text){
+  try{
+    const h=JSON.parse(localStorage.getItem('jarvis_chat')||'[]');
+    h.push({role,text,ts:Date.now()});
+    if(h.length>100)h.splice(0,h.length-100);
+    localStorage.setItem('jarvis_chat',JSON.stringify(h));
+  }catch(e){}
+}
+
+function addChatMsg(role,text,isTyping){
+  const d=document.createElement('div');
+  d.className='chat-msg '+role+(isTyping?' typing':'');
+  d.textContent=text;
+  chatLog.appendChild(d);
+  chatLog.scrollTop=chatLog.scrollHeight;
+  return d;
+}
+
+function typeReply(text){
+  typing=true;
+  document.getElementById('chat').classList.add('open');
+  const el=addChatMsg('jarvis','',true);
+  const words=text.split(' ');let i=0;
+  function next(){
+    if(i>=words.length){el.classList.remove('typing');typing=false;saveChatMsg('jarvis',text);return;}
+    el.textContent+=(i>0?' ':'')+words[i];i++;
+    chatLog.scrollTop=chatLog.scrollHeight;
+    setTimeout(next,60+Math.random()*40);
+  }
+  next();
+}
+
+async function sendChat(){if(typing)return;const text=ci.value.trim();if(!text)return;ci.value='';addChatMsg('user',text);saveChatMsg('user',text);ci.placeholder='...';try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});const d=await r.json();typeReply(d.reply||'Done.');fetchAll().then(render);}catch(e){typeReply('Error — try again.');}ci.placeholder='Ask Jarvis...';}
+
+onresize=()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);};
+// HUD DYNAMIC UPDATES — Jarvis can push panel changes
+let lastNotifyCount=0;
+let currentEmotion='calm';
+async function pollHudUpdates(){
+  try{
+    const r=await fetch('/hud/updates');const u=await r.json();
+    // Override existing panels
+    if(u.panels){Object.entries(u.panels).forEach(([id,html])=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});}
+    // Custom panels (dynamic add)
+    if(u.custom_panels){Object.entries(u.custom_panels).forEach(([id,cfg])=>{
+      let el=document.getElementById(id);
+      if(!el){el=document.createElement('div');el.id=id;el.className='panel vis';document.getElementById('hud').appendChild(el);}
+      el.innerHTML=cfg.content;if(cfg.style)el.setAttribute('style',el.getAttribute('style')||''+';'+cfg.style);
+    });}
+    // Notifications — brief flash at top
+    if(u.notifications&&u.notifications.length>lastNotifyCount){
+      const n=u.notifications[u.notifications.length-1];
+      showNotify(n.text);lastNotifyCount=u.notifications.length;
+    }
+    // Status override
+    if(u.status){document.getElementById('stxt').textContent=u.status;}
+    // EMOTION — apply visual changes
+    if(u.emotion&&u.emotion.name!==currentEmotion){
+      currentEmotion=u.emotion.name;
+      applyEmotion(u.emotion);
+    }
+  }catch(e){}
+}
+
+// Emotion visual system — changes HUD color/speed like MCU Jarvis
+function applyEmotion(e){
+  // Change dot color
+  document.getElementById('dot').style.background=e.dot;
+  // Change title glow
+  const title=document.getElementById('title');
+  title.style.color=e.color;title.style.textShadow=`0 0 20px ${e.glow}`;
+  // Change bloom
+  const bloom=document.getElementById('bloom');
+  const baseColor=e.color.replace(/[\d.]+\)$/,'0.12)');
+  bloom.style.background=`radial-gradient(circle,${baseColor} 0%,transparent 60%)`;
+  // Speed up/slow down Three.js animations
+  window._emotionSpeed=e.speed||1.0;
+  // Panel border tint
+  document.querySelectorAll('.panel').forEach(p=>{
+    p.style.borderColor=e.glow.replace(/[\d.]+\)$/,'0.12)');
+  });
+  // Status text color
+  document.getElementById('stxt').style.color=e.color;
+}
+function showNotify(text){
+  let n=document.getElementById('jarvis-notify');
+  if(!n){n=document.createElement('div');n.id='jarvis-notify';n.style.cssText='position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:100;font-size:11px;color:rgba(140,220,255,0.9);background:rgba(5,20,40,0.85);border:1px solid rgba(80,160,255,0.2);padding:6px 16px;border-radius:4px;opacity:0;transition:opacity 0.4s';document.body.appendChild(n);}
+  n.textContent=text;n.style.opacity='1';
+  setTimeout(()=>{n.style.opacity='0';},4000);
+}
+setInterval(pollHudUpdates,5000);
+document.body.addEventListener('click',e=>{if(e.target.closest('#chat,#nav,.nb,#music-btn'))return;if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});});
+</script>
+</body></html>
