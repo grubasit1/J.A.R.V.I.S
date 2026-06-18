@@ -47,20 +47,20 @@ canvas#c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 .pt{font-size:7px;letter-spacing:2px;margin-bottom:3px;color:rgba(130,195,255,0.7);border-bottom:1px solid rgba(80,160,255,0.06);padding-bottom:2px}
 
 #p-sys{top:48px;left:10px;width:160px}
-#p-brains{top:48px;left:180px;width:175px}
-#p-prog{top:48px;right:170px;width:160px}
-#p-feat{top:48px;right:10px;width:155px}
-#p-goals{bottom:80px;left:10px;width:180px;max-height:110px}
-#p-comms{bottom:80px;left:200px;right:180px;max-width:350px;max-height:110px}
-#p-sched{bottom:80px;right:10px;width:150px;max-height:110px}
-#p-voice{bottom:80px;right:170px;width:155px;max-height:110px}
-#p-arch{top:190px;left:10px;width:170px}
-#p-stats{top:190px;right:10px;width:150px}
-#p-files{top:190px;left:190px;width:165px}
-#p-net{top:190px;right:170px;width:150px}
-#p-tasks{top:330px;left:10px;width:180px}
-#p-stocks{top:330px;left:200px;width:195px;max-height:150px}
-#p-road{top:330px;right:10px;width:160px}
+#p-brains{top:48px;right:10px;width:175px}
+#p-prog{top:190px;left:10px;width:160px}
+#p-feat{top:190px;right:10px;width:175px;max-height:170px}
+#p-goals{top:330px;left:10px;width:170px}
+#p-comms{top:330px;right:10px;width:200px;max-height:110px}
+#p-sched{display:none}
+#p-voice{bottom:80px;left:10px;width:165px;max-height:110px}
+#p-arch{bottom:80px;left:185px;width:165px;max-height:110px}
+#p-stats{bottom:80px;right:10px;width:140px;max-height:110px}
+#p-files{display:none}
+#p-net{display:none}
+#p-tasks{top:48px;left:50%;transform:translateX(-50%);width:180px}
+#p-stocks{display:none}
+#p-road{display:none}
 
 @media(max-width:900px){
 .panel{position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;width:100%!important;max-width:none!important;max-height:120px!important}
@@ -197,21 +197,22 @@ function renderStatic(){
   document.getElementById('clock').innerHTML=n.toTimeString().slice(0,8)+`<br><span style="font-size:7px;opacity:0.35">${n.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'})}</span>`;
   document.getElementById('dot').style.background='rgba(100,255,180,0.8)';
   document.getElementById('stxt').textContent='ONLINE';
-  document.getElementById('p-sys').innerHTML=`<div class="pt">SYSTEM</div>Platform: ChromeOS/Linux<br>RAM: 4GB DDR4<br>CPU: Intel Celeron<br>Disk: 64GB eMMC<br>─────<br><span class="on">●</span> jarvis.service<br><span class="on">●</span> jarvis-server<br><span class="on">●</span> jarvis-watchdog<br><span class="on">●</span> jarvis-autonomy`;
-  document.getElementById('p-brains').innerHTML=`<div class="pt">NEURAL CORES</div><span class="on">●</span> Gemini 2.5 Flash<br><span style="opacity:0.3;font-size:7px">Main brain — fast reasoning</span><br><span class="on">●</span> Claude Fable 5<br><span style="opacity:0.3;font-size:7px">Heavy tasks — deep code</span><br><span class="on">●</span> Groq Whisper<br><span style="opacity:0.3;font-size:7px">Speech-to-text — free tier</span>`;
-  document.getElementById('p-prog').innerHTML=`<div class="pt">PROGRESS</div><span class="lb">Voice</span><span class="bar-bg"><span class="bar-fill" style="width:95%"></span></span><span class="pc">95%</span><br><span class="lb">HUD</span><span class="bar-bg"><span class="bar-fill" style="width:90%"></span></span><span class="pc">90%</span><br><span class="lb">Auto</span><span class="bar-bg"><span class="bar-fill" style="width:85%"></span></span><span class="pc">85%</span><br><span class="lb">YT</span><span class="bar-bg"><span class="bar-fill" style="width:80%"></span></span><span class="pc">80%</span><br><span class="lb">Stocks</span><span class="bar-bg"><span class="bar-fill" style="width:70%"></span></span><span class="pc">70%</span>`;
-  document.getElementById('p-feat').innerHTML=`<div class="pt">FULL SYSTEM ACCESS</div><span class="on">●</span> Shell (run ANY command)<br><span class="on">●</span> Code Execution (autonomous)<br><span class="on">●</span> File System (CRUD + organize)<br><span class="on">●</span> Hardware Control<br><span class="on">●</span> Package Management<br><span class="on">●</span> Service Management<br><span class="on">●</span> Git/Deploy Pipelines<br><span class="on">●</span> Process Control<br><span class="on">●</span> Network Operations<br><span class="on">●</span> Multi-Brain AI`;
-  document.getElementById('p-goals').innerHTML=`<div class="pt">GOALS</div><span style="opacity:0.25">☑ Wake word detection</span><br><span style="opacity:0.25">☑ TV control via WS</span><br><span style="opacity:0.25">☑ YouTube automation</span><br><span style="opacity:0.25">☑ Full shell access</span><br><span style="opacity:0.25">☑ Autonomous code exec</span><br><span style="opacity:0.7">○ Raspberry Pi 24/7</span><br><span style="opacity:0.7">○ Mobile companion app</span>`;
-  document.getElementById('p-comms').innerHTML=`<div class="pt">COMMS LOG</div><div class="msg-u">▸ Install numpy and run my script</div><div class="msg-j">◂ EXEC: Installing numpy, then executing ~/script.py</div><div class="msg-u">▸ What's using all my RAM?</div><div class="msg-j">◂ SHELL: ps aux --sort=-%mem | head -5<br>Done. Chrome: 1.2GB, Python: 340MB.</div><div class="msg-u">▸ Create a backup of my projects</div><div class="msg-j">◂ FILE:write:backup.sh | tar -czf ~/backup.tar.gz ~/projects<br>Done sir. 2.3GB archived.</div>`;
-  document.getElementById('p-sched').innerHTML=`<div class="pt">AUTOMATION</div>YouTube: 3-6 shorts/day<br>Watchdog: every 60s<br>Proactive: hourly<br>─────<br>Backup: daily 3AM<br>Updates: weekly<br><span style="opacity:0.3">Auto-managed</span>`;
-  document.getElementById('p-voice').innerHTML=`<div class="pt">SYSTEM COMMANDS</div>"Install [package]" — apt/pip<br>"Run [script.py]" — Execute<br>"List my files" — FILE:list<br>"Write a script that..." — EXEC<br>"Kill [process]" — SHELL<br>"Check disk space" — SHELL<br>"Update system" — apt upgrade<br>"Git push" — SHELL:git<br>"Restart service" — systemctl<br>"Deploy [app]" — multi-step`;
-  document.getElementById('p-arch').innerHTML=`<div class="pt">EXECUTION ENGINE</div>Voice → Groq Whisper<br>→ Brain Router<br>→ Gemini / Claude<br>→ Command Parser<br>─────<br>SHELL: → subprocess<br>EXEC: → multi-step agent<br>FILE: → fs read/write/del<br>TASK: → async pipeline<br>→ edge-tts → Speaker`;
-  document.getElementById('p-stats').innerHTML=`<div class="pt">PROJECT STATS</div>Lines of Code: 6,200+<br>Dev Hours: 53+<br>Sessions: 47<br>Services: 6 running<br>Brains: 3 active<br>Built in: 5 days<br>By: Basit, 15 🇳🇴`;
-  document.getElementById('p-files').innerHTML=`<div class="pt">CORE FILES</div>jarvis.py — Main brain + shell<br>jarvis_executor.py — Auto-code agent<br>jarvis_server.py — HUD API<br>jarvis_tv.py — Hardware (TV WS)<br>jarvis_autonomy.py — Proactive AI<br>jarvis_watchdog.py — Self-heal<br>jarvis_shorts.py — Content gen<br>jarvis_stocks.py — Trading bot`;
-  document.getElementById('p-net').innerHTML=`<div class="pt">NETWORK</div>HUD Server: :8888<br>API Bridge: :9090<br>WiFi: <span class="on">Connected</span><br>TV: <span class="on">Samsung WS</span><br>Groq STT: <span class="on">Active</span><br>OpenRouter: <span class="on">Fallback</span><br>Tunnel: Cloudflare`;
-  document.getElementById('p-tasks').innerHTML=`<div class="pt">ACTIVE TASKS</div><span style="opacity:0.85;font-size:8.5px">▸ EXEC: Deploy Flask API</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:88%"></span></span><span class="pc">88%</span><br><span style="opacity:0.85;font-size:8.5px">▸ SHELL: System Update</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:45%"></span></span><span class="pc">45%</span><br><span style="opacity:0.85;font-size:8.5px">▸ FILE: Organize ~/Downloads</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:100%"></span></span><span class="pc">✓</span>`;
-  document.getElementById('p-stocks').innerHTML=`<div class="pt">MARKET TICKER</div><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ TSLA $284.50 <span style="opacity:0.7">+2.3%</span></span><br><span style="color:rgba(255,100,100,0.85);font-size:8.5px">▼ AAPL $198.20 <span style="opacity:0.7">-0.8%</span></span><br><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ NVDA $142.80 <span style="opacity:0.7">+1.5%</span></span><br><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ MSFT $458.90 <span style="opacity:0.7">+0.4%</span></span>`;
-  document.getElementById('p-road').innerHTML=`<div class="pt">ROADMAP</div>Phase 1: Voice AI ✓<br>Phase 2: Smart Home ✓<br>Phase 3: Automation ✓<br>Phase 4: HUD ✓<br>Phase 5: Mobile App<br>Phase 6: Multi-room<br><span style="opacity:0.3">Continuous iteration</span>`;
+  document.getElementById('p-sys').innerHTML=`<div class="pt">SYSTEM</div>Platform: Linux (Debian)<br>Python 3.10+<br>Always-on service<br>─────<br><span class="on">●</span> Voice Engine<br><span class="on">●</span> HUD Server<br><span class="on">●</span> Watchdog<br><span class="on">●</span> Executor`;
+  document.getElementById('p-brains').innerHTML=`<div class="pt">NEURAL CORES</div><span class="on">●</span> Gemini 2.5 Flash<br><span style="opacity:0.3;font-size:7px">Main brain — fast reasoning</span><br><span class="on">●</span> Claude (via OpenRouter)<br><span style="opacity:0.3;font-size:7px">Heavy tasks — deep code</span><br><span class="on">●</span> Groq Whisper<br><span style="opacity:0.3;font-size:7px">Speech-to-text — free</span>`;
+  document.getElementById('p-prog').innerHTML=`<div class="pt">MODULES</div><span class="lb">Voice</span><span class="bar-bg"><span class="bar-fill" style="width:95%"></span></span><span class="pc">95%</span><br><span class="lb">Exec</span><span class="bar-bg"><span class="bar-fill" style="width:90%"></span></span><span class="pc">90%</span><br><span class="lb">HUD</span><span class="bar-bg"><span class="bar-fill" style="width:85%"></span></span><span class="pc">85%</span><br><span class="lb">Search</span><span class="bar-bg"><span class="bar-fill" style="width:80%"></span></span><span class="pc">80%</span>`;
+  document.getElementById('p-feat').innerHTML=`<div class="pt">CAPABILITIES</div><span class="on">●</span> Parallel Sub-Agents (DAG)<br><span class="on">●</span> Autonomous Code Exec<br><span class="on">●</span> Review Loops (impl→review→fix)<br><span class="on">●</span> AST Code Intelligence<br><span class="on">●</span> Multi-Model Routing<br><span class="on">●</span> Knowledge Base (semantic)<br><span class="on">●</span> Git Operations<br><span class="on">●</span> Safety Confirmation<br><span class="on">●</span> Context Compaction<br><span class="on">●</span> Pattern Rewriting<br><span class="on">●</span> Web Fetch + Search<br><span class="on">●</span> Screenshot Vision<br><span class="on">●</span> Dry-Run Mode<br><span class="on">●</span> Shell (any command)<br><span class="on">●</span> Voice Control`;
+  document.getElementById('p-goals').innerHTML='';
+  document.getElementById('p-comms').innerHTML=`<div class="pt">EXAMPLE COMMS</div><div class="msg-u">▸ Build a Flask app with auth and tests</div><div class="msg-j">◂ PARALLEL: deploying 3 sub-agents...</div><div class="msg-u">▸ Write secure login — make it perfect</div><div class="msg-j">◂ REVIEW: implement→review→fix cycle running</div><div class="msg-u">▸ Find all unused imports</div><div class="msg-j">◂ AST-grep: 12 unused imports found across 5 files</div><div class="msg-u">▸ Git commit the auth changes</div><div class="msg-j">◂ Committed: "Add JWT auth" (3 files staged)</div>`;
+  document.getElementById('p-voice').innerHTML=`<div class="pt">VOICE TRIGGERS</div>"Hey Jarvis" — Wake<br>"Write a script..." — EXEC:<br>"Build X with Y and Z" — PARALLEL:<br>"Make it perfect" — REVIEW:<br>"Search for..." — Web<br>"Find unused imports" — AST-grep<br>"Git push" — Git ops<br>"Research [topic]" — Deep<br>"Play [song]" — Music`;
+  document.getElementById('p-arch').innerHTML=`<div class="pt">EXECUTION ENGINE v5</div>Voice → Groq Whisper (STT)<br>→ Brain Router<br>→ Gemini / Claude<br>→ Command Parser<br>─────<br>SHELL: → subprocess<br>EXEC: → autonomous agent<br>PARALLEL: → DAG sub-agents<br>REVIEW: → impl→review loop<br>FILE: → fs operations<br>─────<br>AST-grep · Git ops · Web fetch<br>Knowledge base · Dry-run<br>Safety checks · Compaction`;
+  document.getElementById('p-stats').innerHTML=`<div class="pt">PROJECT</div>Lines of Code: 7,500+<br>Dev Hours: 55+<br>Services: 6 running<br>Brains: 3 active<br>Executor: v5<br>Actions: 30+<br>Built in: 5 days<br>Open source`;
+  document.getElementById('p-tasks').innerHTML='';
+  // Hide panels with personal data
+  document.getElementById('p-sched').innerHTML='';
+  document.getElementById('p-files').innerHTML='';
+  document.getElementById('p-net').innerHTML='';
+  document.getElementById('p-stocks').innerHTML='';
+  document.getElementById('p-road').innerHTML='';
 }
 setInterval(()=>{const n=new Date();document.getElementById('clock').innerHTML=n.toTimeString().slice(0,8)+`<br><span style="font-size:7px;opacity:0.35">${n.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'})}</span>`;},1000);
 
@@ -302,10 +303,10 @@ animate();
 
 // PANEL GROUPS
 const GROUPS={
-  all:['p-sys','p-brains','p-prog','p-feat','p-goals','p-comms','p-sched','p-voice','p-arch','p-stats','p-files','p-net','p-tasks','p-stocks','p-road'],
-  main:['p-sys','p-comms','p-brains','p-goals','p-tasks','p-stocks'],
-  intel:['p-feat','p-arch','p-voice','p-stats','p-road','p-prog'],
-  infra:['p-sys','p-brains','p-net','p-files','p-sched','p-tasks'],
+  all:['p-sys','p-brains','p-prog','p-feat','p-comms','p-voice','p-arch','p-stats'],
+  main:['p-sys','p-brains','p-comms','p-stats'],
+  intel:['p-feat','p-arch','p-voice','p-stats','p-prog'],
+  infra:['p-sys','p-brains','p-prog'],
   none:[]
 };
 function showG(g){document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('ac',b.textContent.toLowerCase()===g));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('vis'));let d=0;(GROUPS[g]||[]).forEach(id=>{setTimeout(()=>document.getElementById(id).classList.add('vis'),d);d+=40;});}

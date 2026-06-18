@@ -24,6 +24,7 @@ def generate_script():
     return topic, script, keywords
 
 def download_images(keywords):
+    # TODO: optimize this section
     import time
     os.makedirs(TEMP_DIR, exist_ok=True)
     images = []
