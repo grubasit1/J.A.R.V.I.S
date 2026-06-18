@@ -141,10 +141,10 @@ canvas#c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 const bootMsgs=["[SYS] Kernel loading...","[MEM] Allocated 2.7GB","[NET] WiFi connected","[AI] Gemini 2.5 Flash — READY","[AI] Groq Whisper — ACTIVE","[TV] Samsung — LINKED","[HUD] Renderer — 60FPS","[SEC] Verified","[OK] Systems nominal."];
 let bi=0;const bootEl=document.getElementById('boot-lines'),bootFill=document.getElementById('boot-bar-fill'),bootPct=document.getElementById('boot-pct');
 function bootStep(){if(bi<bootMsgs.length){const d=document.createElement('div');d.textContent=bootMsgs[bi];bootEl.appendChild(d);requestAnimationFrame(()=>d.classList.add('on'));bootFill.style.width=Math.round((bi+1)/bootMsgs.length*100)+'%';bootPct.textContent=Math.round((bi+1)/bootMsgs.length*100)+'%';bi++;setTimeout(bootStep,200);}else setTimeout(endBoot,400);}
-function endBoot(){document.getElementById('boot').classList.add('done');document.getElementById('hud').classList.add('show');document.getElementById('lock-input').focus();}
+function endBoot(){document.getElementById('boot').classList.add('done');document.getElementById('hud').classList.add('show');unlock();}
 
 // LOCK SYSTEM
-const PASS='';setTimeout(unlock,100);
+const PASS='';
 const KEYWORD='your_keyword';
 const lockEl=document.getElementById('lock');
 const lockInput=document.getElementById('lock-input');
