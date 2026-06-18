@@ -49,18 +49,18 @@ canvas#c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 #p-sys{top:48px;left:10px;width:160px}
 #p-brains{top:48px;left:180px;width:175px}
 #p-prog{top:48px;right:170px;width:160px}
-#p-bill{top:48px;right:10px;width:150px}
+#p-feat{top:48px;right:10px;width:155px}
 #p-goals{bottom:80px;left:10px;width:180px;max-height:110px}
 #p-comms{bottom:80px;left:200px;right:180px;max-width:350px;max-height:110px}
 #p-sched{bottom:80px;right:10px;width:150px;max-height:110px}
-#p-orders{bottom:80px;right:170px;width:150px;max-height:110px}
-#p-road{top:190px;left:10px;width:160px}
-#p-cred{top:190px;right:10px;width:145px}
-#p-files{top:190px;left:180px;width:165px}
-#p-net{top:190px;right:165px;width:150px}
-#p-pass{top:330px;right:10px;width:155px}
+#p-voice{bottom:80px;right:170px;width:155px;max-height:110px}
+#p-arch{top:190px;left:10px;width:170px}
+#p-stats{top:190px;right:10px;width:150px}
+#p-files{top:190px;left:190px;width:165px}
+#p-net{top:190px;right:170px;width:150px}
 #p-tasks{top:330px;left:10px;width:180px}
 #p-stocks{top:330px;left:200px;width:195px;max-height:150px}
+#p-road{top:330px;right:10px;width:160px}
 
 @media(max-width:900px){
 .panel{position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;width:100%!important;max-width:none!important;max-height:120px!important}
@@ -103,7 +103,7 @@ canvas#c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 </head><body>
 <div id="boot"><div id="boot-logo">J.A.R.V.I.S</div><div id="boot-bar"><div id="boot-bar-fill"></div></div><div id="boot-lines"></div><div id="boot-pct">0%</div></div>
 <div id="hud">
-  <div id="lock"><div id="lock-title">AUTHENTICATION REQUIRED</div><input id="lock-input" type="password" placeholder="Enter passphrase..." autocomplete="off"><div id="lock-status"></div><div id="lock-attempts"></div><div id="lock-face" onclick="startFaceCheck()" style="margin-top:16px;font-size:9px;color:rgba(140,200,255,0.4);cursor:pointer;border:1px solid rgba(80,160,255,0.12);padding:4px 12px;border-radius:3px">USE FACE ID</div></div>
+  <div id="lock" class="done"><div id="lock-title">AUTHENTICATION REQUIRED</div><input id="lock-input" type="password" placeholder="Enter passphrase..." autocomplete="off"><div id="lock-status"></div><div id="lock-attempts"></div><div id="lock-face" onclick="startFaceCheck()" style="margin-top:16px;font-size:9px;color:rgba(140,200,255,0.4);cursor:pointer;border:1px solid rgba(80,160,255,0.12);padding:4px 12px;border-radius:3px">USE FACE ID</div></div>
   <div id="bloom"></div>
   <div id="title">J.A.R.V.I.S</div>
   <div id="status"><span id="dot"></span><span id="stxt">STANDBY</span></div>
@@ -113,18 +113,18 @@ canvas#c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
   <div class="panel" id="p-sys"></div>
   <div class="panel" id="p-brains"></div>
   <div class="panel" id="p-prog"></div>
-  <div class="panel" id="p-bill"></div>
+  <div class="panel" id="p-feat"></div>
   <div class="panel" id="p-goals"></div>
   <div class="panel" id="p-comms"></div>
   <div class="panel" id="p-sched"></div>
-  <div class="panel" id="p-orders"></div>
-  <div class="panel" id="p-road"></div>
-  <div class="panel" id="p-cred"></div>
+  <div class="panel" id="p-voice"></div>
+  <div class="panel" id="p-arch"></div>
+  <div class="panel" id="p-stats"></div>
   <div class="panel" id="p-files"></div>
   <div class="panel" id="p-net"></div>
-  <div class="panel" id="p-pass"></div>
   <div class="panel" id="p-tasks"></div>
   <div class="panel" id="p-stocks"></div>
+  <div class="panel" id="p-road"></div>
   <div id="nav">
     <div class="nb ac" onclick="showG('all')">ALL</div>
     <div class="nb" onclick="showG('main')">MAIN</div>
@@ -189,7 +189,31 @@ function startFaceCheck(){
   }).catch(()=>{lockStatus.className='fail';lockStatus.textContent='Camera denied — cannot verify.';});
 }
 
-function unlock(){lockEl.classList.add('done');setTimeout(()=>showG('all'),500);}
+function unlock(){lockEl.classList.add('done');setTimeout(()=>showG('all'),500);renderStatic();}
+
+// Static render for public demo (no backend)
+function renderStatic(){
+  const n=new Date();
+  document.getElementById('clock').innerHTML=n.toTimeString().slice(0,8)+`<br><span style="font-size:7px;opacity:0.35">${n.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'})}</span>`;
+  document.getElementById('dot').style.background='rgba(100,255,180,0.8)';
+  document.getElementById('stxt').textContent='ONLINE';
+  document.getElementById('p-sys').innerHTML=`<div class="pt">SYSTEM</div>Platform: ChromeOS/Linux<br>RAM: 4GB DDR4<br>CPU: Intel Celeron<br>Disk: 64GB eMMC<br>─────<br><span class="on">●</span> jarvis.service<br><span class="on">●</span> jarvis-server<br><span class="on">●</span> jarvis-watchdog<br><span class="on">●</span> jarvis-autonomy`;
+  document.getElementById('p-brains').innerHTML=`<div class="pt">NEURAL CORES</div><span class="on">●</span> Gemini 2.5 Flash<br><span style="opacity:0.3;font-size:7px">Main brain — fast reasoning</span><br><span class="on">●</span> Claude Fable 5<br><span style="opacity:0.3;font-size:7px">Heavy tasks — deep code</span><br><span class="on">●</span> Groq Whisper<br><span style="opacity:0.3;font-size:7px">Speech-to-text — free tier</span>`;
+  document.getElementById('p-prog').innerHTML=`<div class="pt">PROGRESS</div><span class="lb">Voice</span><span class="bar-bg"><span class="bar-fill" style="width:95%"></span></span><span class="pc">95%</span><br><span class="lb">HUD</span><span class="bar-bg"><span class="bar-fill" style="width:90%"></span></span><span class="pc">90%</span><br><span class="lb">Auto</span><span class="bar-bg"><span class="bar-fill" style="width:85%"></span></span><span class="pc">85%</span><br><span class="lb">YT</span><span class="bar-bg"><span class="bar-fill" style="width:80%"></span></span><span class="pc">80%</span><br><span class="lb">Stocks</span><span class="bar-bg"><span class="bar-fill" style="width:70%"></span></span><span class="pc">70%</span>`;
+  document.getElementById('p-feat').innerHTML=`<div class="pt">FEATURES</div><span class="on">●</span> Voice Control<br><span class="on">●</span> Multi-Brain AI<br><span class="on">●</span> Smart Home (TV)<br><span class="on">●</span> YouTube Automation<br><span class="on">●</span> Stock Trading<br><span class="on">●</span> Web Search<br><span class="on">●</span> Research Mode<br><span class="on">●</span> Proactive Alerts`;
+  document.getElementById('p-goals').innerHTML=`<div class="pt">GOALS</div><span style="opacity:0.25">☑ Wake word detection</span><br><span style="opacity:0.25">☑ TV control via WS</span><br><span style="opacity:0.25">☑ YouTube automation</span><br><span style="opacity:0.7">○ Multi-room audio</span><br><span style="opacity:0.7">○ Calendar integration</span><br><span style="opacity:0.7">○ Mobile companion app</span>`;
+  document.getElementById('p-comms').innerHTML=`<div class="pt">COMMS LOG</div><div class="msg-u">▸ Hey Jarvis, what's the weather?</div><div class="msg-j">◂ Currently 14°C in Haugesund, partly cloudy.</div><div class="msg-u">▸ Turn on the TV</div><div class="msg-j">◂ Done sir. Samsung TV powered on.</div><div class="msg-u">▸ Play some music</div><div class="msg-j">◂ Playing your liked songs, sir.</div>`;
+  document.getElementById('p-sched').innerHTML=`<div class="pt">AUTOMATION</div>YouTube: 3-6 shorts/day<br>Watchdog: every 60s<br>Proactive: hourly<br>─────<br>Backup: daily 3AM<br>Updates: weekly<br><span style="opacity:0.3">Auto-managed</span>`;
+  document.getElementById('p-voice').innerHTML=`<div class="pt">VOICE COMMANDS</div>"Hey Jarvis" — Wake<br>"Play [song]" — Music<br>"Turn on the TV" — TV<br>"Search for..." — Web<br>"Research [topic]" — Deep<br>"Write a script..." — Code<br>"Price of TSLA" — Stocks<br>"Go dormant" — Sleep`;
+  document.getElementById('p-arch').innerHTML=`<div class="pt">ARCHITECTURE</div>Voice → Groq Whisper<br>→ Brain Router<br>→ Gemini / Claude<br>→ edge-tts → Speaker<br>─────<br>Executor: EXEC:<br>Shell: SHELL:<br>Research: RESEARCH:<br>Vision: SCREENSHOT:`;
+  document.getElementById('p-stats').innerHTML=`<div class="pt">PROJECT STATS</div>Lines of Code: 6,200+<br>Dev Hours: 53+<br>Sessions: 47<br>Services: 6 running<br>Brains: 3 active<br>Built in: 5 days<br>By: Basit, 15 🇳🇴`;
+  document.getElementById('p-files').innerHTML=`<div class="pt">PROJECT FILES</div>jarvis.py — Main brain<br>jarvis_server.py — HUD API<br>jarvis_executor.py — Auto-code<br>jarvis_shorts.py — Content<br>jarvis_autonomy.py — Proactive<br>jarvis_watchdog.py — Monitor<br>jarvis_hud.html — This UI<br>jarvis_tv.py — Samsung WS`;
+  document.getElementById('p-net').innerHTML=`<div class="pt">NETWORK</div>HUD Server: :8888<br>API Bridge: :9090<br>WiFi: <span class="on">Connected</span><br>TV: <span class="on">Samsung WS</span><br>Groq STT: <span class="on">Active</span><br>OpenRouter: <span class="on">Fallback</span><br>Tunnel: Cloudflare`;
+  document.getElementById('p-tasks').innerHTML=`<div class="pt">ACTIVE TASKS</div><span style="opacity:0.85;font-size:8.5px">▸ YouTube Short #38</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:72%"></span></span><span class="pc">72%</span><br><span style="opacity:0.85;font-size:8.5px">▸ Stock Analysis</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:45%"></span></span><span class="pc">45%</span>`;
+  document.getElementById('p-stocks').innerHTML=`<div class="pt">MARKET TICKER</div><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ TSLA $284.50 <span style="opacity:0.7">+2.3%</span></span><br><span style="color:rgba(255,100,100,0.85);font-size:8.5px">▼ AAPL $198.20 <span style="opacity:0.7">-0.8%</span></span><br><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ NVDA $142.80 <span style="opacity:0.7">+1.5%</span></span><br><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ MSFT $458.90 <span style="opacity:0.7">+0.4%</span></span>`;
+  document.getElementById('p-road').innerHTML=`<div class="pt">ROADMAP</div>Phase 1: Voice AI ✓<br>Phase 2: Smart Home ✓<br>Phase 3: Automation ✓<br>Phase 4: HUD ✓<br>Phase 5: Mobile App<br>Phase 6: Multi-room<br><span style="opacity:0.3">Continuous iteration</span>`;
+}
+setInterval(()=>{const n=new Date();document.getElementById('clock').innerHTML=n.toTimeString().slice(0,8)+`<br><span style="font-size:7px;opacity:0.35">${n.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'})}</span>`;},1000);
 
 function lockdown(){
   lockEl.classList.add('lockdown');
@@ -201,7 +225,7 @@ const bootAudio=new Audio('/boot_music');bootAudio.volume=0.03;bootAudio.loop=tr
 function toggleMusic(){if(musicOn)bootAudio.pause();else bootAudio.play();musicOn=!musicOn;}
 setTimeout(()=>{try{bootAudio.play();let v=0.03;const i=setInterval(()=>{v=Math.min(v+0.008,0.1);bootAudio.volume=v;if(v>=0.1)clearInterval(i);},300);}catch(e){}},500);
 setTimeout(bootStep,1800);
-navigator.mediaDevices.getUserMedia({video:true}).then(s=>{document.getElementById('camFeed').srcObject=s;}).catch(()=>{});
+// camera disabled
 function jarvisSpeak(t,d){setTimeout(()=>{fetch("/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:t})}).then(r=>r.blob()).then(b=>{new Audio(URL.createObjectURL(b)).play();}).catch(()=>{});},d);}
 if(!sessionStorage.getItem('jarvis_booted')){jarvisSpeak("Good evening sir. All systems operational.",500);sessionStorage.setItem('jarvis_booted','1');}
 
@@ -282,10 +306,10 @@ animate();
 
 // PANEL GROUPS
 const GROUPS={
-  all:['p-sys','p-brains','p-prog','p-bill','p-goals','p-comms','p-sched','p-orders','p-road','p-cred','p-files','p-net','p-pass','p-tasks','p-stocks'],
-  main:['p-sys','p-comms','p-sched','p-goals','p-net','p-tasks','p-stocks'],
-  intel:['p-bill','p-cred','p-orders','p-road','p-prog','p-files','p-pass'],
-  infra:['p-sys','p-brains','p-prog','p-cred','p-net','p-tasks'],
+  all:['p-sys','p-brains','p-prog','p-feat','p-goals','p-comms','p-sched','p-voice','p-arch','p-stats','p-files','p-net','p-tasks','p-stocks','p-road'],
+  main:['p-sys','p-comms','p-brains','p-goals','p-tasks','p-stocks'],
+  intel:['p-feat','p-arch','p-voice','p-stats','p-road','p-prog'],
+  infra:['p-sys','p-brains','p-net','p-files','p-sched','p-tasks'],
   none:[]
 };
 function showG(g){document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('ac',b.textContent.toLowerCase()===g));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('vis'));let d=0;(GROUPS[g]||[]).forEach(id=>{setTimeout(()=>document.getElementById(id).classList.add('vis'),d);d+=40;});}
@@ -315,16 +339,8 @@ function render(){
   const pr=D.progress||{};
   document.getElementById('p-prog').innerHTML=`<div class="pt">PROGRESS</div>`+Object.entries(pr).map(([k,v])=>`<span class="lb">${k}</span>${B(v)}<span class="pc">${v}%</span>`).join('<br>');
 
-  // BILLING — from /credit
-  const cr=cache.credit||{};
-  let billH=`<div class="pt">BILLING</div>`;
-  billH+=`Remain: <span class="on">kr${cr.remaining||'?'}</span><br>`;
-  billH+=`Used: kr${cr.used||0} ${B(cr.percent_used||0)}<br>`;
-  billH+=`Daily: kr${(cr.daily_budget||22).toFixed(1)}/d<br>`;
-  billH+=`Days: ${cr.days_left||'?'}<br>`;
-  billH+=`VM: <span class="${cr.vm_status==='RUNNING'?'on':'off'}">${cr.vm_status||'?'}</span>`;
-  if(cr.breakdown){billH+='<br>─────';Object.entries(cr.breakdown).forEach(([k,v])=>{billH+=`<br>${k}: kr${v}`;});}
-  document.getElementById('p-bill').innerHTML=billH;
+  // FEATURES
+  document.getElementById('p-feat').innerHTML=`<div class="pt">FEATURES</div><span class="on">●</span> Voice Control<br><span class="on">●</span> Multi-Brain AI<br><span class="on">●</span> Smart Home (TV)<br><span class="on">●</span> YouTube Automation<br><span class="on">●</span> Stock Trading<br><span class="on">●</span> Web Search<br><span class="on">●</span> Research Mode<br><span class="on">●</span> Proactive Alerts`;
 
   // GOALS
   document.getElementById('p-goals').innerHTML=`<div class="pt">GOALS</div>`+(D.goals||[]).slice(0,8).map(g=>`<span style="opacity:${g.done?'0.25':'0.7'}">${g.done?'☑':'○'} ${g.task}</span>`).join('<br>');
@@ -338,30 +354,27 @@ function render(){
     window._lastVoiceLogCount=cache.logs.length;
   }
 
-  // SCHEDULE (Shia combined prayers + workout)
-  document.getElementById('p-sched').innerHTML=`<div class="pt">SCHEDULE</div>Fajr: 2-3 AM<br>Zuhr+Asr: 1-3 PM<br>Isha+Magh: 11-11:40 PM<br>─────<br>Workout: before 8 PM<br>Stretch + shower after<br><span style="opacity:0.3">Quiet: 23:00-07:30</span>`;
+  // SCHEDULE — system schedule
+  document.getElementById('p-sched').innerHTML=`<div class="pt">SCHEDULE</div>YouTube: 3-6 shorts/day<br>Watchdog: every 60s<br>Proactive: hourly<br>─────<br>Backup: daily 3AM<br>Updates: weekly<br><span style="opacity:0.3">Auto-managed</span>`;
 
-  // ORDERS
-  const orders=D.orders||[];
-  document.getElementById('p-orders').innerHTML=`<div class="pt">ORDERS</div>`+(orders.length?orders.map(o=>`${o.item}: <span class="${o.status==='delivered'?'on':'off'}">${o.status}</span>`).join('<br>'):'None');
+  // VOICE COMMANDS
+  document.getElementById('p-voice').innerHTML=`<div class="pt">VOICE COMMANDS</div>"Hey Jarvis" — Wake<br>"Play [song]" — Music<br>"Turn on the TV" — TV<br>"Search for..." — Web<br>"Research [topic]" — Deep<br>"Write a script..." — Code<br>"Price of TSLA" — Stocks<br>"Go dormant" — Sleep`;
 
   // ROADMAP — from /data .roadmap
   const road=D.roadmap||{};
   document.getElementById('p-road').innerHTML=`<div class="pt">ROADMAP</div>`+Object.values(road).map(r=>`${r.name}<br><span style="opacity:0.35;font-size:7px">${r.item} — ${r.cost} — ${r.status}</span>`).join('<br>');
 
-  // CREDENTIALS — from /data .credentials
-  const creds=D.credentials||{};
-  document.getElementById('p-cred').innerHTML=`<div class="pt">CREDENTIALS</div>`+Object.entries(creds).map(([k,v])=>`<span class="${v?'on':'off'}">●</span> ${k}`).join('<br>');
+  // PROJECT STATS
+  document.getElementById('p-stats').innerHTML=`<div class="pt">PROJECT STATS</div>Lines of Code: 6,200+<br>Dev Hours: 53+<br>Sessions: 47<br>Services: 6 running<br>Brains: 3 active<br>Uptime: ${uh}h ${um}m<br>Built in: 5 days`;
 
   // FILES
   document.getElementById('p-files').innerHTML=`<div class="pt">PROJECT FILES</div>jarvis.py — Main brain<br>jarvis_server.py — API :8888<br>jarvis_vision.py — Vision<br>jarvis_shorts.py — Content<br>jarvis_autonomy.py — Proactive<br>jarvis_watchdog.py — Monitor<br>jarvis_hud.html — This UI<br>jarvis_data.json — Data<br>jarvis_memory.json — Memory`;
 
-  // NETWORK — from /live + /credit
-  document.getElementById('p-net').innerHTML=`<div class="pt">NETWORK</div>IP: ${L.ip||'...'}<br>Server: :8888<br>API: :9090<br>WiFi: <span class="on">Connected</span><br>TV: <span class="on">Samsung WS</span><br>VM: <span class="${cr.vm_status==='RUNNING'?'on':'off'}">${cr.vm_status||'OFF'}</span><br>Groq: FREE<br>OpenRouter: FREE`;
+  // NETWORK
+  document.getElementById('p-net').innerHTML=`<div class="pt">NETWORK</div>IP: ${L.ip||'local'}<br>HUD Server: :8888<br>API Bridge: :9090<br>WiFi: <span class="on">Connected</span><br>TV: <span class="on">Samsung WS</span><br>Groq STT: <span class="on">Active</span><br>OpenRouter: <span class="on">Fallback</span>`;
 
-  // PASSWORDS — from /data .passwords (only visible after lock)
-  const pass=D.passwords||{};
-  document.getElementById('p-pass').innerHTML=`<div class="pt">PASSWORDS</div>`+Object.entries(pass).map(([k,v])=>`${k}: <span style="opacity:0.4">${v==='linked'?'●●●●●●':v}</span>`).join('<br>');
+  // ARCHITECTURE
+  document.getElementById('p-arch').innerHTML=`<div class="pt">ARCHITECTURE</div>Voice → Groq Whisper<br>→ Brain Router<br>→ Gemini/Claude<br>→ edge-tts → Speaker<br>─────<br>Executor: EXEC:<br>Shell: SHELL:<br>Research: RESEARCH:<br>Vision: SCREENSHOT:`;
 
   // ACTIVE TASKS — live polling, smooth cinematic progress bars
   const tasks=cache.liveTasks||[];
@@ -405,8 +418,8 @@ function render(){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){fetchAll().then(render);}});
 
 async function fetchAll(){
-  try{const[a,b,c,d,e]=await Promise.allSettled([fetch('/state').then(r=>r.text()),fetch('/data').then(r=>r.json()),fetch('/credit').then(r=>r.json()),fetch('/logs').then(r=>r.json()),fetch('/live').then(r=>r.json())]);
-  if(a.status==='fulfilled')cache.state=a.value.trim();if(b.status==='fulfilled')cache.data=b.value;if(c.status==='fulfilled')cache.credit=c.value;if(d.status==='fulfilled')cache.logs=d.value;if(e.status==='fulfilled')cache.live=e.value;}catch(e){}
+  try{const[a,b,c,d]=await Promise.allSettled([fetch('/state').then(r=>r.text()),fetch('/data').then(r=>r.json()),fetch('/logs').then(r=>r.json()),fetch('/live').then(r=>r.json())]);
+  if(a.status==='fulfilled')cache.state=a.value.trim();if(b.status==='fulfilled')cache.data=b.value;if(c.status==='fulfilled')cache.logs=c.value;if(d.status==='fulfilled')cache.live=d.value;}catch(e){}
 }
 setInterval(()=>{fetchAll().then(render);},5000);
 setTimeout(()=>fetchAll().then(render),800);
