@@ -36,14 +36,18 @@ MEMORY_FILE = os.path.expanduser("~/jarvis_memory.json")
 import jarvis_tv
 STATE_FILE = "/tmp/jarvis_state"
 WAKE_WORDS = ["hey jarvis", "hey jarv", "a jarvis", "hey, jarvis", "hey travis", "hey jervis", "hey jarves", "hey jarbus", "hey javis"]
-# Also match if "jarvis" appears as standalone word
+# Omnidirectional: "jarvis" anywhere triggers wake, but single random word won't
 def _is_wake(text):
     text = text.strip().lower().replace(",", "").replace(".", "")
     if any(w in text for w in WAKE_WORDS):
         return True
-    # "jarvis" alone at start of sentence
+    # "jarvis" anywhere in speech — but needs at least the word itself clearly
     words = text.split()
-    if len(words) <= 4 and "jarvis" in words:
+    if "jarvis" in words or "jarv" in words:
+        return True
+    # Fuzzy: common mishears of "jarvis" as standalone
+    jarvis_sounds = ["travis", "jervis", "jarves", "jarbus", "javis", "service"]
+    if len(words) <= 5 and any(w in words for w in jarvis_sounds):
         return True
     return False
 SHUTDOWN_WORDS = ["exit", "shutdown", "goodbye", "shut off", "shut down", "shutting down", "turn off", "stop jarvis", "quit", "power off", "go to sleep", "sleep", "shut it down", "shot down", "shout down", "shadow", "shad down", "shut done", "shutdon", "shut town", "shut it", "jarvis off", "jarvis stop"]
@@ -337,6 +341,10 @@ def file_operation(cmd):
 
         elif action == "delete":
             path = args if os.path.isabs(args) else os.path.join(home, args)
+            # Safety: never delete home dir, root, or critical system paths
+            blocked = [home, "/", "/home", "/etc", "/usr", "/bin", "/var"]
+            if os.path.realpath(path) in [os.path.realpath(b) for b in blocked]:
+                return "Blocked — cannot delete critical path."
             if os.path.isdir(path):
                 shutil.rmtree(path)
             else:
@@ -861,7 +869,7 @@ noise_samples = collections.deque(maxlen=50)  # Last 50 silence readings
 
 # Local wake word detection (rate-limited Groq to avoid 429s)
 _last_groq_wake_call = 0
-_GROQ_WAKE_COOLDOWN = 3  # seconds between Groq calls (only reached after energy/speech filters pass)
+_GROQ_WAKE_COOLDOWN = 2  # seconds between Groq calls (only reached after energy/speech filters pass)
 _consecutive_speech_needed = 3  # Need 3 consecutive speech frames before triggering Whisper (saves tokens)
 
 def bandpass_simple(data_bytes):
@@ -897,7 +905,7 @@ def is_speech(data_bytes, threshold=None):
     """Determine if audio chunk contains speech using energy + ZCR."""
     global noise_floor
     if threshold is None:
-        threshold = noise_floor * 2.0  # Higher multiplier = less false triggers
+        threshold = noise_floor * 1.8  # Omnidirectional but won't trigger on ambient noise
     energy = compute_energy(data_bytes)
     zcr = zero_crossing_rate(data_bytes)
     # Speech: moderate energy above noise floor + ZCR between 0.02-0.35
@@ -933,7 +941,7 @@ def record(max_seconds=10, sensitivity=None):
     """Record audio — stops when voice drops back to noise floor (instant end detection)."""
     global noise_floor
     if sensitivity is None:
-        sensitivity = noise_floor * 2.5
+        sensitivity = noise_floor * 2.0
     frames, silent, talking = [], 0, False
     pre_speech_frames = collections.deque(maxlen=5)
     speech_frames = 0
@@ -957,17 +965,17 @@ def record(max_seconds=10, sensitivity=None):
             update_noise_floor(filtered)
             pre_speech_frames.append(filtered)
         
-        # Dynamic end detection: short utterance = wait longer, long speech = end faster
+        # Dynamic end detection: short utterance = end faster for fragments
         if talking:
             if speech_frames < 8:
-                # Very short (< 0.5s speech) — wait 2s to see if they continue
-                end_threshold = 32
-            elif speech_frames < 25:
-                # Medium (< 1.6s) — wait 1.5s
-                end_threshold = 24
-            else:
-                # Long sentence (> 1.6s spoken) — they're done after 1s silence
+                # Very short (< 0.5s speech) — 1s silence = done (fragment-friendly)
                 end_threshold = 16
+            elif speech_frames < 25:
+                # Medium (< 1.6s) — 1s silence
+                end_threshold = 16
+            else:
+                # Long sentence (> 1.6s spoken) — 0.75s silence = done
+                end_threshold = 12
             if silent > end_threshold:
                 break
         
@@ -1187,6 +1195,34 @@ def ask_openrouter(text, system_prompt):
         print(f"[openrouter error]: {e}")
         return None
 
+def _load_file_context(text):
+    """Auto-load relevant files when user mentions them — Kiro-style context awareness."""
+    lower = text.lower()
+    file_patterns = re.findall(r'[\w_/]+\.(?:py|js|html|json|sh|css|yaml|md)', text)
+    if not file_patterns:
+        code_words = {"executor": "jarvis_executor.py", "server": "jarvis_server.py",
+                      "hud": "jarvis_hud.html", "tv": "jarvis_tv.py", "stocks": "jarvis_stocks.py",
+                      "watchdog": "jarvis_watchdog.py", "autonomy": "jarvis_autonomy.py",
+                      "shorts": "jarvis_shorts.py", "daily": "jarvis_daily.py",
+                      "vision": "jarvis_vision.py", "upload": "jarvis_upload.py"}
+        for word, filepath in code_words.items():
+            if word in lower:
+                file_patterns = [filepath]
+                break
+    if not file_patterns:
+        return ""
+    loaded = []
+    for fp in file_patterns[:2]:
+        path = fp if os.path.isabs(fp) else os.path.join(HOME, fp)
+        if os.path.exists(path):
+            try:
+                with open(path) as f:
+                    content = f.read(8000)
+                loaded.append(f"--- {fp} ---\n{content}")
+            except:
+                pass
+    return "\n".join(loaded)
+
 def ask_gemini_text(text):
     """Send text to Gemini AI Studio (free). Falls back to OpenRouter, then Groq."""
     global _last_fail_time
@@ -1200,6 +1236,10 @@ def ask_gemini_text(text):
         results = web_search(text)
         if results:
             augment = f"\n\n[Web results]:\n{results}"
+    # Context loading: auto-read mentioned files
+    file_ctx = _load_file_context(text)
+    if file_ctx:
+        augment += f"\n\n[File context]:\n{file_ctx}"
     prompt = get_system_prompt() + ctx + augment
     # Try Gemini free API first (skip if recently failed)
     if time.time() - _last_fail_time > _BACKOFF_SECS:
@@ -1422,6 +1462,12 @@ def process_reply(reply):
     # Shell command execution
     if "SHELL:" in reply:
         cmd = reply.split("SHELL:", 1)[1].strip().split("\n")[0]
+        # Safety: block obviously destructive commands on mishear
+        dangerous = ["rm -rf /", "rm -rf ~", "rm -rf /*", "mkfs", "dd if=", "> /dev/sd", "chmod -R 777 /",
+                     ":(){ :|:&", "rm -rf .", "format"]
+        if any(d in cmd for d in dangerous):
+            speak("Sir, that command looks destructive. I'm blocking it for safety.")
+            return
         try:
             out = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30,
                                 cwd=os.path.expanduser("~"))
@@ -1658,15 +1704,15 @@ try:
             continue
 
         # Listen for wake word (Groq Whisper — rate-limited to avoid 429)
-        audio, talked = record(max_seconds=4, sensitivity=noise_floor * 2.5)
+        audio, talked = record(max_seconds=4, sensitivity=noise_floor * 2.0)
         if not talked:
             continue
         # Ignore very short audio (< 0.7s — too short to be "hey jarvis")
-        if len(audio) < 16000 * 2 * 0.7:
+        if len(audio) < 16000 * 2 * 0.5:
             continue
         # Energy check — must be clearly above noise
         energy = compute_energy(audio)
-        if energy < max(noise_floor * 3.0, 500):
+        if energy < max(noise_floor * 2.5, 400):
             continue
         # Verify speech-like content: check middle chunk has moderate ZCR (filters mechanical noise)
         mid = len(audio) // 2
@@ -1696,13 +1742,13 @@ try:
         time.sleep(0.3)
         mic_buffer.clear()
         cmd_audio, cmd_talked = record(max_seconds=12, sensitivity=noise_floor * 2.0)
-        if not cmd_talked or len(cmd_audio) < 16000 * 2 * 0.8:
+        if not cmd_talked or len(cmd_audio) < 16000 * 2 * 0.6:
             # No real speech — go back to waiting silently
             print("[silence]: no response, returning to standby")
             continue
         # Extra energy check on command audio
         cmd_energy = compute_energy(cmd_audio)
-        if cmd_energy < 100:
+        if cmd_energy < 120:
             print("[low energy]: ambient noise, returning to standby")
             continue
         wav_data = make_wav(cmd_audio)

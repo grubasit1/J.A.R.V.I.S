@@ -200,16 +200,16 @@ function renderStatic(){
   document.getElementById('p-sys').innerHTML=`<div class="pt">SYSTEM</div>Platform: ChromeOS/Linux<br>RAM: 4GB DDR4<br>CPU: Intel Celeron<br>Disk: 64GB eMMC<br>─────<br><span class="on">●</span> jarvis.service<br><span class="on">●</span> jarvis-server<br><span class="on">●</span> jarvis-watchdog<br><span class="on">●</span> jarvis-autonomy`;
   document.getElementById('p-brains').innerHTML=`<div class="pt">NEURAL CORES</div><span class="on">●</span> Gemini 2.5 Flash<br><span style="opacity:0.3;font-size:7px">Main brain — fast reasoning</span><br><span class="on">●</span> Claude Fable 5<br><span style="opacity:0.3;font-size:7px">Heavy tasks — deep code</span><br><span class="on">●</span> Groq Whisper<br><span style="opacity:0.3;font-size:7px">Speech-to-text — free tier</span>`;
   document.getElementById('p-prog').innerHTML=`<div class="pt">PROGRESS</div><span class="lb">Voice</span><span class="bar-bg"><span class="bar-fill" style="width:95%"></span></span><span class="pc">95%</span><br><span class="lb">HUD</span><span class="bar-bg"><span class="bar-fill" style="width:90%"></span></span><span class="pc">90%</span><br><span class="lb">Auto</span><span class="bar-bg"><span class="bar-fill" style="width:85%"></span></span><span class="pc">85%</span><br><span class="lb">YT</span><span class="bar-bg"><span class="bar-fill" style="width:80%"></span></span><span class="pc">80%</span><br><span class="lb">Stocks</span><span class="bar-bg"><span class="bar-fill" style="width:70%"></span></span><span class="pc">70%</span>`;
-  document.getElementById('p-feat').innerHTML=`<div class="pt">FEATURES</div><span class="on">●</span> Voice Control<br><span class="on">●</span> Multi-Brain AI<br><span class="on">●</span> Smart Home (TV)<br><span class="on">●</span> YouTube Automation<br><span class="on">●</span> Stock Trading<br><span class="on">●</span> Web Search<br><span class="on">●</span> Research Mode<br><span class="on">●</span> Proactive Alerts`;
-  document.getElementById('p-goals').innerHTML=`<div class="pt">GOALS</div><span style="opacity:0.25">☑ Wake word detection</span><br><span style="opacity:0.25">☑ TV control via WS</span><br><span style="opacity:0.25">☑ YouTube automation</span><br><span style="opacity:0.7">○ Multi-room audio</span><br><span style="opacity:0.7">○ Calendar integration</span><br><span style="opacity:0.7">○ Mobile companion app</span>`;
-  document.getElementById('p-comms').innerHTML=`<div class="pt">COMMS LOG</div><div class="msg-u">▸ Hey Jarvis, what's the weather?</div><div class="msg-j">◂ Currently 14°C in Haugesund, partly cloudy.</div><div class="msg-u">▸ Turn on the TV</div><div class="msg-j">◂ Done sir. Samsung TV powered on.</div><div class="msg-u">▸ Play some music</div><div class="msg-j">◂ Playing your liked songs, sir.</div>`;
+  document.getElementById('p-feat').innerHTML=`<div class="pt">FULL SYSTEM ACCESS</div><span class="on">●</span> Shell (run ANY command)<br><span class="on">●</span> Code Execution (autonomous)<br><span class="on">●</span> File System (CRUD + organize)<br><span class="on">●</span> Hardware Control<br><span class="on">●</span> Package Management<br><span class="on">●</span> Service Management<br><span class="on">●</span> Git/Deploy Pipelines<br><span class="on">●</span> Process Control<br><span class="on">●</span> Network Operations<br><span class="on">●</span> Multi-Brain AI`;
+  document.getElementById('p-goals').innerHTML=`<div class="pt">GOALS</div><span style="opacity:0.25">☑ Wake word detection</span><br><span style="opacity:0.25">☑ TV control via WS</span><br><span style="opacity:0.25">☑ YouTube automation</span><br><span style="opacity:0.25">☑ Full shell access</span><br><span style="opacity:0.25">☑ Autonomous code exec</span><br><span style="opacity:0.7">○ Raspberry Pi 24/7</span><br><span style="opacity:0.7">○ Mobile companion app</span>`;
+  document.getElementById('p-comms').innerHTML=`<div class="pt">COMMS LOG</div><div class="msg-u">▸ Install numpy and run my script</div><div class="msg-j">◂ EXEC: Installing numpy, then executing ~/script.py</div><div class="msg-u">▸ What's using all my RAM?</div><div class="msg-j">◂ SHELL: ps aux --sort=-%mem | head -5<br>Done. Chrome: 1.2GB, Python: 340MB.</div><div class="msg-u">▸ Create a backup of my projects</div><div class="msg-j">◂ FILE:write:backup.sh | tar -czf ~/backup.tar.gz ~/projects<br>Done sir. 2.3GB archived.</div>`;
   document.getElementById('p-sched').innerHTML=`<div class="pt">AUTOMATION</div>YouTube: 3-6 shorts/day<br>Watchdog: every 60s<br>Proactive: hourly<br>─────<br>Backup: daily 3AM<br>Updates: weekly<br><span style="opacity:0.3">Auto-managed</span>`;
-  document.getElementById('p-voice').innerHTML=`<div class="pt">VOICE COMMANDS</div>"Hey Jarvis" — Wake<br>"Play [song]" — Music<br>"Turn on the TV" — TV<br>"Search for..." — Web<br>"Research [topic]" — Deep<br>"Write a script..." — Code<br>"Price of TSLA" — Stocks<br>"Go dormant" — Sleep`;
-  document.getElementById('p-arch').innerHTML=`<div class="pt">ARCHITECTURE</div>Voice → Groq Whisper<br>→ Brain Router<br>→ Gemini / Claude<br>→ edge-tts → Speaker<br>─────<br>Executor: EXEC:<br>Shell: SHELL:<br>Research: RESEARCH:<br>Vision: SCREENSHOT:`;
+  document.getElementById('p-voice').innerHTML=`<div class="pt">SYSTEM COMMANDS</div>"Install [package]" — apt/pip<br>"Run [script.py]" — Execute<br>"List my files" — FILE:list<br>"Write a script that..." — EXEC<br>"Kill [process]" — SHELL<br>"Check disk space" — SHELL<br>"Update system" — apt upgrade<br>"Git push" — SHELL:git<br>"Restart service" — systemctl<br>"Deploy [app]" — multi-step`;
+  document.getElementById('p-arch').innerHTML=`<div class="pt">EXECUTION ENGINE</div>Voice → Groq Whisper<br>→ Brain Router<br>→ Gemini / Claude<br>→ Command Parser<br>─────<br>SHELL: → subprocess<br>EXEC: → multi-step agent<br>FILE: → fs read/write/del<br>TASK: → async pipeline<br>→ edge-tts → Speaker`;
   document.getElementById('p-stats').innerHTML=`<div class="pt">PROJECT STATS</div>Lines of Code: 6,200+<br>Dev Hours: 53+<br>Sessions: 47<br>Services: 6 running<br>Brains: 3 active<br>Built in: 5 days<br>By: Basit, 15 🇳🇴`;
-  document.getElementById('p-files').innerHTML=`<div class="pt">PROJECT FILES</div>jarvis.py — Main brain<br>jarvis_server.py — HUD API<br>jarvis_executor.py — Auto-code<br>jarvis_shorts.py — Content<br>jarvis_autonomy.py — Proactive<br>jarvis_watchdog.py — Monitor<br>jarvis_hud.html — This UI<br>jarvis_tv.py — Samsung WS`;
+  document.getElementById('p-files').innerHTML=`<div class="pt">CORE FILES</div>jarvis.py — Main brain + shell<br>jarvis_executor.py — Auto-code agent<br>jarvis_server.py — HUD API<br>jarvis_tv.py — Hardware (TV WS)<br>jarvis_autonomy.py — Proactive AI<br>jarvis_watchdog.py — Self-heal<br>jarvis_shorts.py — Content gen<br>jarvis_stocks.py — Trading bot`;
   document.getElementById('p-net').innerHTML=`<div class="pt">NETWORK</div>HUD Server: :8888<br>API Bridge: :9090<br>WiFi: <span class="on">Connected</span><br>TV: <span class="on">Samsung WS</span><br>Groq STT: <span class="on">Active</span><br>OpenRouter: <span class="on">Fallback</span><br>Tunnel: Cloudflare`;
-  document.getElementById('p-tasks').innerHTML=`<div class="pt">ACTIVE TASKS</div><span style="opacity:0.85;font-size:8.5px">▸ YouTube Short #38</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:72%"></span></span><span class="pc">72%</span><br><span style="opacity:0.85;font-size:8.5px">▸ Stock Analysis</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:45%"></span></span><span class="pc">45%</span>`;
+  document.getElementById('p-tasks').innerHTML=`<div class="pt">ACTIVE TASKS</div><span style="opacity:0.85;font-size:8.5px">▸ EXEC: Deploy Flask API</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:88%"></span></span><span class="pc">88%</span><br><span style="opacity:0.85;font-size:8.5px">▸ SHELL: System Update</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:45%"></span></span><span class="pc">45%</span><br><span style="opacity:0.85;font-size:8.5px">▸ FILE: Organize ~/Downloads</span><br><span class="bar-bg" style="width:100px"><span class="bar-fill" style="width:100%"></span></span><span class="pc">✓</span>`;
   document.getElementById('p-stocks').innerHTML=`<div class="pt">MARKET TICKER</div><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ TSLA $284.50 <span style="opacity:0.7">+2.3%</span></span><br><span style="color:rgba(255,100,100,0.85);font-size:8.5px">▼ AAPL $198.20 <span style="opacity:0.7">-0.8%</span></span><br><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ NVDA $142.80 <span style="opacity:0.7">+1.5%</span></span><br><span style="color:rgba(100,255,180,0.85);font-size:8.5px">▲ MSFT $458.90 <span style="opacity:0.7">+0.4%</span></span>`;
   document.getElementById('p-road').innerHTML=`<div class="pt">ROADMAP</div>Phase 1: Voice AI ✓<br>Phase 2: Smart Home ✓<br>Phase 3: Automation ✓<br>Phase 4: HUD ✓<br>Phase 5: Mobile App<br>Phase 6: Multi-room<br><span style="opacity:0.3">Continuous iteration</span>`;
 }
@@ -221,13 +221,9 @@ function lockdown(){
   lockStatus.className='fail';lockStatus.textContent='UNAUTHORIZED — SYSTEM LOCKED';
   lockInput.style.display='none';
 }
-const bootAudio=new Audio('/boot_music');bootAudio.volume=0.03;bootAudio.loop=true;let musicOn=true;
-function toggleMusic(){if(musicOn)bootAudio.pause();else bootAudio.play();musicOn=!musicOn;}
-setTimeout(()=>{try{bootAudio.play();let v=0.03;const i=setInterval(()=>{v=Math.min(v+0.008,0.1);bootAudio.volume=v;if(v>=0.1)clearInterval(i);},300);}catch(e){}},500);
+let musicOn=false;
+function toggleMusic(){}
 setTimeout(bootStep,1800);
-// camera disabled
-function jarvisSpeak(t,d){setTimeout(()=>{fetch("/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:t})}).then(r=>r.blob()).then(b=>{new Audio(URL.createObjectURL(b)).play();}).catch(()=>{});},d);}
-if(!sessionStorage.getItem('jarvis_booted')){jarvisSpeak("Good evening sir. All systems operational.",500);sessionStorage.setItem('jarvis_booted','1');}
 
 // === THREE.JS — CLEAN RADIANT HEXAGON ===
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,0.1,100);
@@ -414,26 +410,9 @@ function render(){
   document.getElementById('p-stocks').innerHTML=sH;
 }
 
-// Visibility change — refresh data when tab comes back
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){fetchAll().then(render);}});
+// Static demo — no backend refresh needed
 
-async function fetchAll(){
-  try{const[a,b,c,d]=await Promise.allSettled([fetch('/state').then(r=>r.text()),fetch('/data').then(r=>r.json()),fetch('/logs').then(r=>r.json()),fetch('/live').then(r=>r.json())]);
-  if(a.status==='fulfilled')cache.state=a.value.trim();if(b.status==='fulfilled')cache.data=b.value;if(c.status==='fulfilled')cache.logs=c.value;if(d.status==='fulfilled')cache.live=d.value;}catch(e){}
-}
-setInterval(()=>{fetchAll().then(render);},5000);
-setTimeout(()=>fetchAll().then(render),800);
-// Live task polling — fast updates for cinematic feel
-cache.liveTasks=[];
-async function pollTasks(){try{const r=await fetch('/tasks');cache.liveTasks=await r.json();render();}catch(e){}}
-setInterval(pollTasks,800);setTimeout(pollTasks,500);
-
-// Stock ticker polling
-cache.stocks={stocks:[]};
-async function pollStocks(){try{const r=await fetch('/stocks');cache.stocks=await r.json();}catch(e){}}
-setInterval(pollStocks,10000);setTimeout(pollStocks,2000);
-// Refresh stock data server-side every 30s
-setInterval(()=>{fetch('/refresh-stocks').catch(()=>{})},30000);
+// Static mode — no backend polling needed
 
 // Cinematic progress bar animation — ticks up fast like Iron Man HUD
 function animateBar(bar,pctEl,from,to){
@@ -514,37 +493,12 @@ function typeReply(text){
   next();
 }
 
-async function sendChat(){if(typing)return;const text=ci.value.trim();if(!text)return;ci.value='';addChatMsg('user',text);saveChatMsg('user',text);ci.placeholder='...';try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});const d=await r.json();typeReply(d.reply||'Done.');fetchAll().then(render);}catch(e){typeReply('Error — try again.');}ci.placeholder='Ask Jarvis...';}
+const jarvisResponses=["At your service, sir. Though this is the demo — the real me runs shell commands, writes code, and controls hardware autonomously.","I'm running in showcase mode. On the live system, I execute SHELL: commands, manage files, and deploy code on voice command.","In the full system, I'd run that as a subprocess right now. SHELL:, EXEC:, FILE: — full system access.","The live JARVIS has autonomous code execution. Say 'write me a script' and I plan, code, test, and deploy it independently.","I control the filesystem, run any terminal command, manage services, install packages — all via voice. This is just the preview.","Full hardware access: TV via WebSocket, system via subprocess, files via Python os/shutil. All running on a Chromebook.","Sir, the real version of me has written and deployed 6,200+ lines of code autonomously. This static page doesn't do me justice."];
+let respIdx=0;
+async function sendChat(){if(typing)return;const text=ci.value.trim();if(!text)return;ci.value='';addChatMsg('user',text);saveChatMsg('user',text);const reply=jarvisResponses[respIdx%jarvisResponses.length];respIdx++;typeReply(reply);}
 
 onresize=()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);};
-// HUD DYNAMIC UPDATES — Jarvis can push panel changes
-let lastNotifyCount=0;
-let currentEmotion='calm';
-async function pollHudUpdates(){
-  try{
-    const r=await fetch('/hud/updates');const u=await r.json();
-    // Override existing panels
-    if(u.panels){Object.entries(u.panels).forEach(([id,html])=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});}
-    // Custom panels (dynamic add)
-    if(u.custom_panels){Object.entries(u.custom_panels).forEach(([id,cfg])=>{
-      let el=document.getElementById(id);
-      if(!el){el=document.createElement('div');el.id=id;el.className='panel vis';document.getElementById('hud').appendChild(el);}
-      el.innerHTML=cfg.content;if(cfg.style)el.setAttribute('style',el.getAttribute('style')||''+';'+cfg.style);
-    });}
-    // Notifications — brief flash at top
-    if(u.notifications&&u.notifications.length>lastNotifyCount){
-      const n=u.notifications[u.notifications.length-1];
-      showNotify(n.text);lastNotifyCount=u.notifications.length;
-    }
-    // Status override
-    if(u.status){document.getElementById('stxt').textContent=u.status;}
-    // EMOTION — apply visual changes
-    if(u.emotion&&u.emotion.name!==currentEmotion){
-      currentEmotion=u.emotion.name;
-      applyEmotion(u.emotion);
-    }
-  }catch(e){}
-}
+// No backend polling in public demo
 
 // Emotion visual system — changes HUD color/speed like MCU Jarvis
 function applyEmotion(e){
@@ -572,7 +526,7 @@ function showNotify(text){
   n.textContent=text;n.style.opacity='1';
   setTimeout(()=>{n.style.opacity='0';},4000);
 }
-setInterval(pollHudUpdates,5000);
-document.body.addEventListener('click',e=>{if(e.target.closest('#chat,#nav,.nb,#music-btn'))return;if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});});
+// No backend polling in public demo
+
 </script>
 </body></html>

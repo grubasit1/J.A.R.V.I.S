@@ -164,6 +164,68 @@ systemctl --user start jarvis.service jarvis-server.service
 | `jarvis-mic.service` | Network mic streaming |
 | `jarvis-tunnel.service` | Cloudflare tunnel (public access) |
 
+## How to Talk to JARVIS
+
+JARVIS uses **omnidirectional listening** — you don't need perfect sentences or to be right next to the mic. Short fragments work.
+
+### Wake Word
+Say **"Jarvis"** (or "Hey Jarvis") from anywhere in the room. He'll respond with "Sir?" or "Listening." then wait for your command.
+
+**What works:**
+- "Jarvis, lights off"
+- "Hey Jarvis"
+- "Yo Jarvis stop"
+- "Jarvis... what time is it"
+- Just "Jarvis" (he'll ask what you need)
+
+**What won't trigger him:**
+- Random background speech without "Jarvis"
+- Music/TV audio (filtered by ZCR + energy detection)
+- Single syllable noises
+
+### Command Style
+After wake, speak naturally — fragments are fine:
+- ✅ "turn off the TV" 
+- ✅ "TV off"
+- ✅ "weather"
+- ✅ "play phonk"
+- ✅ "install flask then write me an API"
+- ❌ Silence (he'll go back to standby after 1s)
+
+### Full System Access
+JARVIS has **complete control** over the machine. Everything you can do in a terminal, he can do by voice:
+
+| Prefix | What it does | Example |
+|--------|-------------|---------|
+| `SHELL:` | Run any terminal command | "Run htop" → `SHELL:htop` |
+| `EXEC:` | Multi-step autonomous task | "Write a Flask API with auth" → plans, codes, tests, deploys |
+| `FILE:` | Filesystem operations | "List my files" → `FILE:list:~` |
+
+**System commands you can say:**
+```
+"Install numpy"              → SHELL:pip3 install numpy
+"Update my system"           → SHELL:sudo apt update && sudo apt upgrade -y
+"Kill chrome"                → SHELL:pkill chromium  
+"Check disk space"           → SHELL:df -h
+"Restart the server"         → SHELL:systemctl --user restart jarvis-server
+"Git push"                   → SHELL:cd ~/jarvis && git add -A && git push
+"Find all python files"      → FILE:find:.py
+"Create a folder projects"   → FILE:mkdir:projects
+"Read my config"             → FILE:read:.bashrc
+"Write hello to test.txt"    → FILE:write:test.txt|hello world
+"Delete temp files"          → FILE:delete:/tmp/jarvis_*
+"Organize my downloads"      → FILE:organize:Downloads
+```
+
+**Autonomous execution (EXEC:)** — for complex tasks:
+```
+"Write me a web scraper for news"
+"Create a backup script and schedule it"  
+"Set up a Flask app with SQLite"
+"Fix the bug in jarvis_tv.py"
+```
+JARVIS will: plan steps → write code → run it → check for errors → fix them → report back. Up to 20 steps, self-correcting.
+
 ## Voice Commands
 
 | Command | What it does |
