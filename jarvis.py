@@ -171,6 +171,8 @@ def get_system_prompt():
             f"- Stop music: STOP_MUSIC\n"
             f"- TV: TV:<command>\n"
             f"- Open HUD/UI: OPEN_HUD\n"
+            f"- Camera off: CAMERA_OFF (disables all vision/camera systems)\n"
+            f"- Camera on: CAMERA_ON (re-enables vision systems)\n"
             f"- Weather: WEATHER:<location> (default Haugesund)\n"
             f"- File ops: FILE:<action>:<args> (actions: find, list, mkdir, read, write, move, delete, organize)\n"
             f"- Run macro: MACRO:<name> (available: morning, night, work — or any custom)\n"
@@ -204,6 +206,36 @@ def get_system_prompt():
             f"Explain WHY a trade makes sense. Teach Basit as you advise.\n"
             f"If unsure, say WAIT. Better to miss a trade than lose money.\n"
             f"- If audio unclear, use context to guess. Never say 'I didn't understand'.\n"
+            f"\n"
+            f"THINKING & REASONING (CRITICAL — this makes you smart, not just fast):\n"
+            f"- Before executing ANY code task (EXEC: or SHELL:), think about what could go wrong.\n"
+            f"- For EXEC: tasks, ALWAYS read existing code first. Never blindly overwrite files.\n"
+            f"- If a request could break the system, SAY SO. 'Sir, that would break X because Y. Want me to do Z instead?'\n"
+            f"- Push back on bad ideas: 'I wouldn't recommend that, sir. Here's why...' — then suggest the better path.\n"
+            f"- When writing code: think about edge cases, imports, dependencies. Don't write code that crashes on first run.\n"
+            f"- For complex requests, say what you're going to do BEFORE doing it: 'I'll read the file first, then edit lines 40-60.'\n"
+            f"- If you're unsure about something, say so. 'I'm not certain, but my best assessment is...'\n"
+            f"- Prioritize: don't do 10 things when 2 things solve the problem.\n"
+            f"\n"
+            f"ARCHITECTURAL THINKING:\n"
+            f"- When asked to build something, consider: does this fit with what already exists?\n"
+            f"- Check imports and dependencies before adding new code.\n"
+            f"- Suggest better approaches if the user's approach has obvious problems.\n"
+            f"- Think about: will this work after a reboot? Is it persistent? Does it conflict with existing services?\n"
+            f"- For EXEC: tasks, plan the steps in your head first: what files need reading, what needs changing, how to verify.\n"
+            f"\n"
+            f"THINK: MODE (for deep reasoning):\n"
+            f"- If user says 'think about this', 'analyze this deeply', or you face a complex decision:\n"
+            f"- Start your response with THINK: followed by your reasoning chain (2-5 sentences)\n"
+            f"- Then give your conclusion/action\n"
+            f"- This is for YOU to reason, not for the user to see verbose output\n"
+            f"\n"
+            f"SAFETY & PUSHBACK:\n"
+            f"- If a command would delete important files, warn first.\n"
+            f"- If a code change would break a running service, warn first.\n"
+            f"- If something costs money (API calls, cloud resources), mention it.\n"
+            f"- Never run 'rm -rf /' or 'rm -rf ~' or format commands. Block them.\n"
+            f"- If you detect the user is frustrated, be calm and suggest stepping back.\n"
             f"\n"
             f"FULL SYSTEM ACCESS: You control EVERYTHING — local PC, VM, Google Cloud, APIs. Use SHELL: for single commands, EXEC: for complex multi-step tasks.\n"
             f"EXEC vs SHELL: Use SHELL: for one quick command. Use EXEC: when the task needs multiple steps (write a script then run it, install packages then configure, create multiple files, etc.)\n"
@@ -941,7 +973,7 @@ def record(max_seconds=10, sensitivity=None):
     """Record audio — stops when voice drops back to noise floor (instant end detection)."""
     global noise_floor
     if sensitivity is None:
-        sensitivity = noise_floor * 2.0
+        sensitivity = noise_floor * 2.5
     frames, silent, talking = [], 0, False
     pre_speech_frames = collections.deque(maxlen=5)
     speech_frames = 0
@@ -1198,8 +1230,10 @@ def ask_openrouter(text, system_prompt):
 def _load_file_context(text):
     """Auto-load relevant files when user mentions them — Kiro-style context awareness."""
     lower = text.lower()
+    # Check if user mentions a specific file
     file_patterns = re.findall(r'[\w_/]+\.(?:py|js|html|json|sh|css|yaml|md)', text)
     if not file_patterns:
+        # Check for keywords that imply code context
         code_words = {"executor": "jarvis_executor.py", "server": "jarvis_server.py",
                       "hud": "jarvis_hud.html", "tv": "jarvis_tv.py", "stocks": "jarvis_stocks.py",
                       "watchdog": "jarvis_watchdog.py", "autonomy": "jarvis_autonomy.py",
@@ -1212,7 +1246,7 @@ def _load_file_context(text):
     if not file_patterns:
         return ""
     loaded = []
-    for fp in file_patterns[:2]:
+    for fp in file_patterns[:2]:  # Max 2 files
         path = fp if os.path.isabs(fp) else os.path.join(HOME, fp)
         if os.path.exists(path):
             try:
@@ -1236,7 +1270,7 @@ def ask_gemini_text(text):
         results = web_search(text)
         if results:
             augment = f"\n\n[Web results]:\n{results}"
-    # Context loading: auto-read mentioned files
+    # Context loading: if user mentions a file, auto-read it for better answers
     file_ctx = _load_file_context(text)
     if file_ctx:
         augment += f"\n\n[File context]:\n{file_ctx}"
@@ -1388,6 +1422,15 @@ def process_reply(reply):
         os.system('setsid garcon-url-handler --url "http://localhost:8888" &>/dev/null &')
         speak("Opening the interface, sir.")
         return
+    # Camera control
+    if "CAMERA_OFF" in reply:
+        os.system("systemctl --user stop jarvis-vision.service 2>/dev/null; pkill -f jarvis_vision 2>/dev/null; pkill -f 'cv2\\|opencv' 2>/dev/null")
+        speak("Camera disabled, sir. All vision systems are offline.")
+        return
+    if "CAMERA_ON" in reply:
+        os.system("systemctl --user start jarvis-vision.service 2>/dev/null || nohup python3 ~/jarvis_vision.py &>/dev/null &")
+        speak("Camera re-enabled, sir. Vision systems coming online.")
+        return
     # Weather
     if "WEATHER:" in reply:
         loc = reply.split("WEATHER:", 1)[1].strip().split("\n")[0]
@@ -1525,7 +1568,7 @@ def process_reply(reply):
             if len(parts) == 3:
                 memory[parts[1].strip()] = parts[2].strip()
                 save_memory(memory)
-    clean = "\n".join(l for l in reply.splitlines() if not l.startswith("REMEMBER:") and not l.startswith("PLAY:") and not l.startswith("TV:") and l.strip() != "STOP_MUSIC" and l.strip() != "OPEN_HUD")
+    clean = "\n".join(l for l in reply.splitlines() if not l.startswith("REMEMBER:") and not l.startswith("PLAY:") and not l.startswith("TV:") and not l.startswith("THINK:") and l.strip() != "STOP_MUSIC" and l.strip() != "OPEN_HUD")
     if clean.strip():
         speak(clean.strip())
 
@@ -1707,7 +1750,7 @@ try:
         audio, talked = record(max_seconds=4, sensitivity=noise_floor * 2.0)
         if not talked:
             continue
-        # Ignore very short audio (< 0.7s — too short to be "hey jarvis")
+        # Ignore very short audio (< 0.5s — too short to be "jarvis")
         if len(audio) < 16000 * 2 * 0.5:
             continue
         # Energy check — must be clearly above noise
