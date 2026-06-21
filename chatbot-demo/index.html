@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        p { text-align: center; color: #666; }
+        #chatbox {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        .bot {
+            background: #e9e9e9;
+            color: #333;
+        }
+        #input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        #user-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            outline: none;
+        }
+        #user-input:focus { border-color: #007bff; }
+        #send-btn {
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #send-btn:hover { background: #0056b3; }
+        #api-setup {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+        #api-setup input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-top: 8px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+        #api-setup label { font-size: 13px; color: #555; }
+        .typing { opacity: 0.6; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>AI Chatbot Demo</h1>
+    <p>Talk to our AI assistant below:</p>
+
+    <div id="api-setup">
+        <label>Enter your Gemini API key to test (get one free at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a>):</label>
+        <input type="password" id="api-key" placeholder="AIza...">
+    </div>
+
+    <div id="chatbox">
+        <div class="message bot">Hi! I'm your AI assistant. How can I help you today?</div>
+    </div>
+
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMessage()">
+        <button id="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const input = document.getElementById('user-input');
+        const apiKeyInput = document.getElementById('api-key');
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.className = 'message ' + sender;
+            div.textContent = text;
+            chatbox.appendChild(div);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            return div;
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+            if (!text) return;
+            if (!apiKey) { alert('Please enter your Gemini API key'); return; }
+
+            addMessage(text, 'user');
+            input.value = '';
+
+            const typing = addMessage('Thinking...', 'bot typing');
+
+            try {
+                const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: text }] }],
+                        systemInstruction: { parts: [{ text: 'You are a friendly, helpful AI assistant for a business website. Keep answers concise and professional. Max 2-3 sentences.' }] }
+                    })
+                });
+                const data = await res.json();
+                typing.remove();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+                addMessage(reply, 'bot');
+            } catch (e) {
+                typing.remove();
+                addMessage('Error: Could not reach AI. Check your API key.', 'bot');
+            }
+        }
+    </script>
+</body>
+</html>
