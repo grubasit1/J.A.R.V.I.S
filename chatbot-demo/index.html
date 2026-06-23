@@ -1,82 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>AI Chatbot Demo</title>
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-	    body { font-family: 'Segoe Ui', sans-serif; background: #f0f2f5; height: 100vh ; display: flex; align-items: center; justify-content: center; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-	    .chat-header { background: #007bff; color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
-	    .chat-header .avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;}
-	    .chat-header .info h3 { font-size: 14px; font-weight: 600; }
-	    .chat-header .info span { font-size: 11px; opacity: 0.8; }
+        .chat-container { width: 400px; height: 600px; background: white; border-radius: 16px; box-shadow: 0 5px 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
 
-	    .chat-messages {flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-	    .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
-	    .msg.user { background: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-	    .msg.bot { background: #f0f0f0; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; }
-	    .msg.bot b { font-weight: 600; }
+        .chat-header { background: #007bff; color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+        .chat-header .avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .chat-header .info h3 { font-size: 14px; font-weight: 600; }
+        .chat-header .info span { font-size: 11px; opacity: 0.8; }
 
-	    .typing-indicator { align-self: flex-start; padding: 10px 14px; background: #f0f0f0; border-radius: 16px; display: flex; gap: 4px; }
-	    .typing-indicator span { width: 6px; height: 6px; background: #999; border-radius: 50%; animation: bounce 1.4s infinite; }
-	    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-	    .typing-indicator span:nth-child(3) {animation-delay: 0.4s; }
-	    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: transelateY(-4px); } }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg.user { background: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg.bot { background: #f0f0f0; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg.bot b { font-weight: 600; }
 
-	    .chat-input { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 8px; }
-	    .chat-input input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 20px; font-size: 14px; outline: none; }
-	    .chat-input input:focus { border-color: #007bff; }
-	    .chat-input button { width: 38px; height: 38px; background: #007bff; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; }
-	    .chat-input button:hover { background: #0056b3; }
+        .typing-indicator { align-self: flex-start; padding: 10px 14px; background: #f0f0f0; border-radius: 16px; display: flex; gap: 4px; }
+        .typing-indicator span { width: 6px; height: 6px; background: #999; border-radius: 50%; animation: bounce 1.4s infinite; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
 
-	    .setup { position: fixed; top: 20px; right: 20px; background: white; padding: 12px 16px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 12px; }
-	    .setup input { margin-top: 6px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; width: 200px; font-size: 12px; }
+        .chat-input { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 8px; }
+        .chat-input input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 20px; font-size: 14px; outline: none; }
+        .chat-input input:focus { border-color: #007bff; }
+        .chat-input button { width: 38px; height: 38px; background: #007bff; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; }
+        .chat-input button:hover { background: #0056b3; }
 
-	    @media (max-width: 500px) {
-		    .chat-container { width: 100%; height: 100vh; border-radius: 0; }
-		    .setup { top: auto; bottom: 10px; right: 10px; }
+        .badge { text-align: center; padding: 8px; font-size: 11px; color: #999; }
 
+        @media (max-width: 500px) {
+            .chat-container { width: 100%; height: 100vh; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="avatar">🤖</div>
+            <div class="info">
+                <h3>AI Assistant</h3>
+                <span>● Online</span>
+            </div>
+        </div>
+        <div class="chat-messages" id="messages">
+            <div class="msg bot">Hi! I'm your AI assistant. How can I help you today?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="input" placeholder="Type a message..." onkeypress="if(event.key==='Enter')send()">
+            <button onclick="send()">➤</button>
+        </div>
+        <div class="badge">Powered by AI • Custom built for your business</div>
+    </div>
+
+    <script>
+        const messages = document.getElementById('messages');
+        const input = document.getElementById('input');
+
+        const replies = {
+            'hello': "Hello! Welcome to our store. How can I assist you today?",
+            'hi': "Hi there! 👋 What can I help you with?",
+            'hours': "We're open **Monday–Friday 9AM–6PM** and **Saturday 10AM–4PM**. Closed Sundays.",
+            'pricing': "Our plans start at **$29/month** for basic and **$79/month** for pro. Want me to explain the differences?",
+            'price': "Our plans start at **$29/month** for basic and **$79/month** for pro. Want me to explain the differences?",
+            'shipping': "We offer **free shipping** on orders over $50. Standard delivery takes 3–5 business days.",
+            'return': "You can return any item within **30 days** for a full refund. Just contact us with your order number.",
+            'contact': "You can reach us at **support@example.com** or call **(555) 123-4567** during business hours.",
+            'thanks': "You're welcome! Let me know if there's anything else I can help with. 😊",
+            'bye': "Goodbye! Have a great day! 👋",
+        };
+
+        function getReply(text) {
+            const lower = text.toLowerCase();
+            for (const [key, val] of Object.entries(replies)) {
+                if (lower.includes(key)) return val;
             }
-	</style>
-    </head>
-    <body>
-	 <div class="setup">
-		 <label>gemini API key:</label><br>
-		 <input type="password" id="api-key" placeholder="AIza...">
-	     </div>
+            return "Thanks for your message! A team member will follow up shortly. Is there anything else I can help with in the meantime?";
+        }
 
-             <div class="chat-container">
-		  <div class="avatar">🤖</div>
-		  <div class="info">
-			  <h3>AI Assistant</h3>
-			  <span>● Online</span>
-	          </div>
-	       <div>
-	      <div class="chat-messages" id="messages">
-		  <div class="msg bot">HI! I'm your AI assistant. How can i help you today?</div>
-              <div>
-	     <div class="chat-input">
-		     <input type="text" id="input" placeholder="Type a message..." onkeypress="if(event.key=='Enter')send()">
-		     <button onclick="send()">➤</button>
-	      </div>
-	  </div>
+        function addMsg(text, sender) {
+            const d = document.createElement('div');
+            d.className = 'msg ' + sender;
+            d.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            messages.appendChild(d);
+            messages.scrollTop = messages.scrollHeight;
+        }
 
-	  <script>
-               const message = document.getElementById('messages');
-	       const input = document.getElementById('input');
-	       const history = [];
+        function send() {
+            const text = input.value.trim();
+            if (!text) return;
+            addMsg(text, 'user');
+            input.value = '';
 
-	       function addMsg(text, sender) {
-		       const d = document.createElement('div');
-		       d.className = 'msg ' + sender;
-		       d.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-		       message.appendChild(d);
-		       message.scrollTop = messages.scrollHeight;
-                      return d;
-	          }
+            // Show typing indicator
+            const typing = document.createElement('div');
+            typing.className = 'typing-indicator';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            messages.appendChild(typing);
+            messages.scrollTop = messages.scrollHeight;
 
-	          function showTyping() {
-			  const d = document.createElement('div');
-
+            // Simulate delay then reply
+            setTimeout(() => {
+                typing.remove();
+                addMsg(getReply(text), 'bot');
+            }, 800 + Math.random() * 700);
+        }
+    </script>
+</body>
+</html>
