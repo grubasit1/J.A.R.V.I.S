@@ -3,39 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot Demo</title>
+    <title>NexusAI — Intelligent Business Assistant</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-        .chat-container { width: 400px; height: 600px; background: white; border-radius: 16px; box-shadow: 0 5px 40px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-container {
+            width: 420px; height: 640px;
+            background: #1a1a2e;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(99,102,241,0.15);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(99,102,241,0.2);
+        }
 
-        .chat-header { background: #007bff; color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
-        .chat-header .avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .chat-header .info h3 { font-size: 14px; font-weight: 600; }
-        .chat-header .info span { font-size: 11px; opacity: 0.8; }
+        .chat-header {
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            padding: 18px 20px;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid rgba(99,102,241,0.2);
+        }
+        .chat-header .avatar {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+        }
+        .chat-header .info h3 { font-size: 15px; font-weight: 600; color: #f0f0ff; }
+        .chat-header .info span { font-size: 11px; color: #22c55e; }
+        .chat-header .info span::before { content: '● '; }
 
-        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
-        .msg.user { background: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .msg.bot { background: #f0f0f0; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg.bot b { font-weight: 600; }
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 16px;
+            display: flex; flex-direction: column; gap: 10px;
+            scroll-behavior: smooth;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 4px; }
 
-        .typing-indicator { align-self: flex-start; padding: 10px 14px; background: #f0f0f0; border-radius: 16px; display: flex; gap: 4px; }
-        .typing-indicator span { width: 6px; height: 6px; background: #999; border-radius: 50%; animation: bounce 1.4s infinite; }
+        .msg {
+            max-width: 82%; padding: 11px 15px;
+            border-radius: 16px; font-size: 14px;
+            line-height: 1.5; word-wrap: break-word;
+            animation: fadeUp 0.3s ease;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .msg.user {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white; align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .msg.bot {
+            background: #252547;
+            color: #e0e0ff; align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(99,102,241,0.15);
+        }
+
+        .typing-indicator {
+            align-self: flex-start; padding: 12px 16px;
+            background: #252547; border-radius: 16px;
+            display: flex; gap: 5px;
+            border: 1px solid rgba(99,102,241,0.15);
+            animation: fadeUp 0.3s ease;
+        }
+        .typing-indicator span {
+            width: 7px; height: 7px;
+            background: #6366f1; border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
         .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+        @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
 
-        .chat-input { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 8px; }
-        .chat-input input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 20px; font-size: 14px; outline: none; }
-        .chat-input input:focus { border-color: #007bff; }
-        .chat-input button { width: 38px; height: 38px; background: #007bff; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; }
-        .chat-input button:hover { background: #0056b3; }
+        .chat-input {
+            padding: 14px 16px;
+            border-top: 1px solid rgba(99,102,241,0.15);
+            display: flex; gap: 10px;
+            background: #16213e;
+        }
+        .chat-input input {
+            flex: 1; padding: 11px 16px;
+            background: #252547; border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 12px; font-size: 14px;
+            color: #f0f0ff; outline: none;
+            transition: border-color 0.2s;
+        }
+        .chat-input input::placeholder { color: #666; }
+        .chat-input input:focus { border-color: #6366f1; }
+        .chat-input button {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white; border: none; border-radius: 12px;
+            cursor: pointer; font-size: 16px;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+        .chat-input button:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(99,102,241,0.5); }
+        .chat-input button:active { transform: scale(0.95); }
 
-        .badge { text-align: center; padding: 8px; font-size: 11px; color: #999; }
+        .badge { text-align: center; padding: 8px; font-size: 10px; color: #555; background: #16213e; }
+        .badge a { color: #6366f1; text-decoration: none; }
+
+        .suggestions {
+            padding: 8px 16px 4px; display: flex; gap: 6px; flex-wrap: wrap;
+        }
+        .suggestions button {
+            padding: 6px 12px; font-size: 12px;
+            background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+            border-radius: 20px; color: #a5b4fc; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .suggestions button:hover { background: rgba(99,102,241,0.2); border-color: #6366f1; }
 
         @media (max-width: 500px) {
+            body { align-items: stretch; }
             .chat-container { width: 100%; height: 100vh; border-radius: 0; }
         }
     </style>
@@ -43,45 +137,105 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <div class="avatar">🤖</div>
+            <div class="avatar">⚡</div>
             <div class="info">
-                <h3>AI Assistant</h3>
-                <span>● Online</span>
+                <h3>NexusAI Assistant</h3>
+                <span>Online — avg response 1.2s</span>
             </div>
         </div>
         <div class="chat-messages" id="messages">
-            <div class="msg bot">Hi! I'm your AI assistant. How can I help you today?</div>
+            <div class="msg bot">Hey! 👋 I'm NexusAI — your 24/7 business assistant. Ask me about pricing, features, setup, or anything else.</div>
+        </div>
+        <div class="suggestions" id="suggestions">
+            <button onclick="ask(this.textContent)">Pricing</button>
+            <button onclick="ask(this.textContent)">Features</button>
+            <button onclick="ask(this.textContent)">How does it work?</button>
+            <button onclick="ask(this.textContent)">Demo</button>
         </div>
         <div class="chat-input">
-            <input type="text" id="input" placeholder="Type a message..." onkeypress="if(event.key==='Enter')send()">
-            <button onclick="send()">➤</button>
+            <input type="text" id="input" placeholder="Ask anything..." onkeypress="if(event.key==='Enter')send()">
+            <button onclick="send()">↑</button>
         </div>
-        <div class="badge">Powered by AI • Custom built for your business</div>
+        <div class="badge">Built by <a href="#">NexusAI</a> • Custom AI for your business</div>
     </div>
 
     <script>
         const messages = document.getElementById('messages');
         const input = document.getElementById('input');
+        const suggestionsEl = document.getElementById('suggestions');
+        let msgCount = 0;
 
-        const replies = {
-            'hello': "Hello! Welcome to our store. How can I assist you today?",
-            'hi': "Hi there! 👋 What can I help you with?",
-            'hours': "We're open **Monday–Friday 9AM–6PM** and **Saturday 10AM–4PM**. Closed Sundays.",
-            'pricing': "Our plans start at **$29/month** for basic and **$79/month** for pro. Want me to explain the differences?",
-            'price': "Our plans start at **$29/month** for basic and **$79/month** for pro. Want me to explain the differences?",
-            'shipping': "We offer **free shipping** on orders over $50. Standard delivery takes 3–5 business days.",
-            'return': "You can return any item within **30 days** for a full refund. Just contact us with your order number.",
-            'contact': "You can reach us at **support@example.com** or call **(555) 123-4567** during business hours.",
-            'thanks': "You're welcome! Let me know if there's anything else I can help with. 😊",
-            'bye': "Goodbye! Have a great day! 👋",
-        };
+        const patterns = [
+            { match: /\b(hi|hello|hey|sup|yo)\b/i, replies: [
+                "Hey there! 👋 How can I help you today?",
+                "Hi! Welcome — what can I do for you?",
+                "Hello! Ask me anything about our product."
+            ]},
+            { match: /\b(price|pricing|cost|how much|plans?|subscription)\b/i, replies: [
+                "We have 3 plans:\n\n**Starter** — $29/mo (1 bot, 1K messages)\n**Pro** — $79/mo (5 bots, 10K messages, analytics)\n**Enterprise** — Custom pricing\n\n90% of businesses start with Pro. Want a comparison?",
+                "Starts at $29/month. Most popular is Pro at $79/month — includes analytics and multi-bot support. Need a breakdown?"
+            ]},
+            { match: /\b(feature|what can|capabilit|do you do|what does)\b/i, replies: [
+                "Here's what NexusAI does:\n\n• Answers customer questions 24/7\n• Learns from your docs, FAQ, and website\n• Hands off to a human when needed\n• Tracks analytics (top questions, satisfaction)\n• Integrates with Slack, WhatsApp, your site\n\nWant to know more about any of these?",
+                "We handle customer support, lead capture, FAQ, appointment booking, and more — all trained on YOUR business data. No coding needed."
+            ]},
+            { match: /\b(how (does|do) (it|this) work|setup|install|integrate|get started)\b/i, replies: [
+                "Setup takes about 5 minutes:\n\n1. Paste your website URL — we auto-learn your content\n2. Customize the look to match your brand\n3. Copy one line of code into your site\n\nThat's it. Your bot is live and answering questions. Want me to walk you through it?",
+                "Just connect your knowledge base (website, docs, or FAQ), customize the personality, and embed one script tag. Takes 5 minutes — no developers needed."
+            ]},
+            { match: /\b(demo|try|test|see it|preview|example)\b/i, replies: [
+                "You're looking at it! 😄 This chat IS the demo. Everything you see — the responses, the speed, the UI — that's what your customers would experience.\n\nWant to start a free 14-day trial?",
+                "This is a live demo right now! Ask me anything a customer would ask and see how I handle it. This exact experience embeds into your website."
+            ]},
+            { match: /\b(ship|deliver|shipping)\b/i, replies: [
+                "Since NexusAI is software, there's nothing to ship! You get instant access after signup. The embed goes live on your site in under 5 minutes.",
+                "It's all cloud-based — instant access, no installation. Copy-paste our embed code and you're live."
+            ]},
+            { match: /\b(support|help|contact|reach|talk to (a )?human)\b/i, replies: [
+                "You can reach our team at **support@nexusai.com** or use live chat on our website. Response time is usually under 2 hours during business days.\n\nPro and Enterprise plans include priority support with 30-min response time.",
+                "We're available via email, live chat, or scheduled calls. Enterprise gets a dedicated account manager. Want me to connect you with someone?"
+            ]},
+            { match: /\b(refund|cancel|money back)\b/i, replies: [
+                "We offer a **14-day free trial** (no card required) and a **30-day money-back guarantee** on all paid plans. Cancel anytime from your dashboard — no calls or emails needed.",
+            ]},
+            { match: /\b(better|vs|competitor|compared|why you|why nexus|different)\b/i, replies: [
+                "What sets us apart:\n\n• **5-min setup** — no dev team required\n• **Actually learns** — from your real data, not generic GPT\n• **Handoff built-in** — complex questions go to your team\n• **Flat pricing** — no per-message fees eating your margin\n\nMost alternatives charge per AI response. We don't.",
+            ]},
+            { match: /\b(api|developer|code|sdk|webhook)\b/i, replies: [
+                "Yes! We have a full REST API and webhooks for custom integrations. SDK available for JavaScript, Python, and React.\n\nDocs at **docs.nexusai.com** — or just use the no-code dashboard if you prefer.",
+            ]},
+            { match: /\b(secur|privacy|data|gdpr|complian)\b/i, replies: [
+                "Security is core to us:\n\n• SOC 2 Type II certified\n• GDPR compliant\n• Data encrypted at rest and in transit\n• Your data is never used to train our models\n• EU hosting available\n\nWant our security whitepaper?",
+            ]},
+            { match: /\b(thank|thanks|thx|cheers|appreciate)\b/i, replies: [
+                "You're welcome! 🙌 Let me know if anything else comes up.",
+                "Happy to help! Anything else I can answer?",
+                "Anytime! Good luck with your project 🚀"
+            ]},
+            { match: /\b(bye|goodbye|see ya|later|done)\b/i, replies: [
+                "See you! 👋 Come back anytime — I'm here 24/7.",
+                "Bye! Good luck — and remember, the 14-day trial is free whenever you're ready."
+            ]},
+            { match: /\b(who (made|built|created)|your (creator|maker))\b/i, replies: [
+                "Built by a small team obsessed with making AI actually useful for businesses. We've helped 2,000+ companies automate their support. 🚀"
+            ]},
+            { match: /\b(language|multilingual|spanish|french|german|arabic)\b/i, replies: [
+                "NexusAI supports **95+ languages** automatically. It detects the customer's language and responds in kind — no extra setup. Works great for international teams."
+            ]},
+            { match: /\b(analytics|stats|track|metrics|report)\b/i, replies: [
+                "Pro plan includes full analytics:\n\n• Top questions customers ask\n• Resolution rate\n• Customer satisfaction scores\n• Handoff reasons\n• Peak traffic times\n\nAll exportable. Helps you spot gaps in your docs too."
+            ]},
+        ];
 
         function getReply(text) {
-            const lower = text.toLowerCase();
-            for (const [key, val] of Object.entries(replies)) {
-                if (lower.includes(key)) return val;
+            for (const p of patterns) {
+                if (p.match.test(text)) return p.replies[Math.floor(Math.random() * p.replies.length)];
             }
-            return "Thanks for your message! A team member will follow up shortly. Is there anything else I can help with in the meantime?";
+            // Smart fallback based on message length
+            if (text.split(' ').length > 10) {
+                return "Great question! That's something our team can give you a detailed answer on. Want me to connect you with a specialist, or can I help with something else in the meantime?";
+            }
+            return "I can help with pricing, features, setup, integrations, or security — what interests you most?";
         }
 
         function addMsg(text, sender) {
@@ -90,6 +244,8 @@
             d.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
             messages.appendChild(d);
             messages.scrollTop = messages.scrollHeight;
+            msgCount++;
+            if (msgCount === 2) suggestionsEl.style.display = 'none';
         }
 
         function send() {
@@ -98,19 +254,19 @@
             addMsg(text, 'user');
             input.value = '';
 
-            // Show typing indicator
             const typing = document.createElement('div');
             typing.className = 'typing-indicator';
             typing.innerHTML = '<span></span><span></span><span></span>';
             messages.appendChild(typing);
             messages.scrollTop = messages.scrollHeight;
 
-            // Simulate delay then reply
             setTimeout(() => {
                 typing.remove();
                 addMsg(getReply(text), 'bot');
-            }, 800 + Math.random() * 700);
+            }, 600 + Math.random() * 900);
         }
+
+        function ask(text) { input.value = text; send(); }
     </script>
 </body>
 </html>
